@@ -7,7 +7,6 @@ import ply.lex as lex
 tokens = (
   'COLON',
   'COMMA',
-  'COMMAND',
   'COMMENT',
   'DIRECTIVE',
   'DECI',
@@ -61,6 +60,8 @@ def t_error(tok):
   print("Illegal token '%s'" % tok.value[0])
   t.lexer.skip(1)
 
+t_ignore  = "\n,"
+
 # Build the lexer
 lexer = lex.lex()
 
@@ -73,7 +74,12 @@ precedence = 'system'
 
 def p_system(p):
   '''
-  system : system list
+  system : 
+  | instruction
+  | command_comment
+  | command
+  | directive
+  | comment
   '''
   pass
 
@@ -92,21 +98,24 @@ def p_command_comment(p):
 def p_command(p):
   '''
   command : 
-  | COMMAND argument argument argument argument 
-  | COMMAND argument argument argument 
-  | COMMAND argument argument 
-  | COMMAND argument 
+  | argument argument argument argument 
+  | argument argument argument 
+  | argument argument 
+  | argument 
   '''
+  p[0] = (p.slice[1].type, p[1])
 
 def p_argument(p):
   '''
   argument : REGISTER | OFFSET | DECI | HEXI
   '''
+  p[0] = (p.slice[1].type, p[1])
 
 def p_directive(p):
   '''
   directive : DIRECTIVE
   '''
+  p[0] = (p.slice[1].type, p[1])
 
 def p_comment(p):
   '''
