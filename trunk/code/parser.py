@@ -1,11 +1,13 @@
 import ply.yacc as yacc
 import ply.lex as lex
 
-# hier hoort nog wat van tok
+# moet nog wat over tok
 
+# Tokens list
 tokens = (
   'COLON',
   'COMMA',
+  'COMMAND',
   'COMMENT',
   'DIRECTIVE',
   'DECI',
@@ -54,18 +56,75 @@ def t_line(tok):
   '\l+'
   return tok
 
+# Handle errors
 def t_error(tok):
-  print("Wrong character '%s'" % tok.value[0])
+  print("Illegal token '%s'" % tok.value[0])
   t.lexer.skip(1)
 
+# Build the lexer
 lexer = lex.lex()
 
-parse_rules = 'system'
+while 1:
+  tok = lexer.token()
+  if not tok:
+    break
 
-def p_system
-  '''system : system list '''
+precedence = 'system'
+
+def p_system(p):
+  '''
+  system : system list
+  '''
   pass
 
+def p_instruction_command(p):
+    '''
+    instruction : command
+    '''
+    pass
+
+def p_command_comment(p):
+  '''
+  command_comment : command COMMENT
+  '''
+  p[0] = p[1]
+
+def p_command(p):
+  '''
+  command : 
+  | COMMAND argument argument argument argument 
+  | COMMAND argument argument argument 
+  | COMMAND argument argument 
+  | COMMAND argument 
+  '''
+
+def p_argument(p):
+  '''
+  argument : REGISTER | OFFSET | DECI | HEXI
+  '''
+
+def p_directive(p):
+  '''
+  directive : DIRECTIVE
+  '''
+
+def p_comment(p):
+  '''
+  comment : COMMENT
+  '''
+  pass
+
+def p_error(p):
+  pass
+
+# Build the parser
 parser = yacc.yacc() 
 
-
+while 1:
+  try:
+    s = raw_input()
+  except EOFError:
+    break
+  if not s:
+    continue
+  parsed = parser.parse(s)
