@@ -1,8 +1,6 @@
 import ply.yacc as yacc
 import ply.lex as lex
 
-# moet nog wat over tok
-
 # Tokens list
 tokens = (
   'COLON',
@@ -47,20 +45,13 @@ def t_REGISTER(tok):
   r'\$[a-zA-Z0-9]+'
   return tok
 
-def t_space(tok):
-  r'\s+'
-  return tok
-
-def t_line(tok):
-  '\l+'
-  return tok
-
 # Handle errors
 def t_error(tok):
   print("Illegal token '%s'" % tok.value[0])
   t.lexer.skip(1)
 
-t_ignore  = "\n,"
+# '[ \t\n]'
+t_ignore  = ' \t\n'
 
 # Build the lexer
 lexer = lex.lex()
