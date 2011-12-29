@@ -6,46 +6,44 @@ from parser import parse
 from optimize import optimize
 
 if __name__ == '__main__':
-  parser = OptionParser()
+  usage = "usage: %prog [options] file"
+  parser = OptionParser(usage)
   parser.add_option('-i', '--input', dest='input', help='Input the assembly file',
                           metavar='FILE')
-  parser.add_option('-o', '--output', dest='output', help='Output destination of ' \
+  parser.add_option('-d', '--dest', dest='filename', help='Destination of ' \
                           'optimized assembly file',
+                          metavar='FILE')
   (options, args) = parser.parse_args()
-  
-  # Controlling input of assembly file
-  input_file = options.input
-  if input_file == None:
-    parser.error('Missing assembly file argument')
-  output_file = options.output
-  if output_file == None:
-    output_file = input_file.split('/')[-1].rsplit('.', 1)
-    if (len(output_file) < 1):
-      output_file = output_file[0] + '_opt'
-    else:
-      output_file = output_file[0] + '_opt.' + output_file[1] 
+  if len(args) != 1:
+    parser.error("incorrect number of arguments")
 
+  # Controlling input of assembly file
+  if options.input == None:
+    parser.error('Missing assembly file argument')
+  if options.filename == None:
+    output = options.filename[0] + '_opt'
+  else:
+    output = options.filename[0] + '_opt.' + options.filename[1]
+  
   # Controlling opening input and output files
   try:
-    in_file = open(input_file, 'r')
+    in_file = open(options.input, 'r')
   except:
-    sys.exit('Not able to open input file: ' + input_file)
+    sys.exit('Not able to open input file: ' + options.input)
   try:
-    out_file = open(output_file, 'w')
+    out_file = open(output, 'w')
   except:
     in_file.close()
-    sys.exit('Not able to make output file' + output_file) 
+    sys.exit('Not able to make output file' + output) 
 
   # Parse and optimization
   parsing = parser.parse(in_file.readlines())
   optimized = optimize(parsing)
+  in_file.close()
 
   out = write_statements(optimized)
   out_file.write(out)
-
-  in_file.close()
   out_file.close()
-  print( output_file + ': Destination output file')
 
 if __name__ == '__main__'
   main()
