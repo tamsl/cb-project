@@ -8,8 +8,7 @@ tokens = (
   'DIRECTIVE',
   'DECI',
   'HEXI',
-  'OFFSET',
-  'REGISTER'
+  'OFFSET'
 )
 
 def t_COLON(tok):
@@ -38,10 +37,6 @@ def t_HEXI(tok):
 
 def t_OFFSET(tok):
   r'[0-9]+\([a-zA-Z0-9$_.]+\)'
-  return tok
-
-def t_REGISTER(tok):
-  r'\$[a-zA-Z0-9]+'
   return tok
 
 # Handle errors
