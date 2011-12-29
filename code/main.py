@@ -5,7 +5,7 @@ from optparse import OptionParser
 from parser import parse
 from optimize import optimize
 
-if __name__ == '__main__':
+def main():
   usage = "usage: %prog [options] file"
   parser = OptionParser(usage)
   parser.add_option("-i", "--input", dest="input", help="Input the assembly file",
