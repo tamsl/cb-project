@@ -3,7 +3,7 @@ import sys
 from optparse import OptionParser
 
 from parser import parse
-from optimize import optimize
+from optimize import *
 
 def main():
   usage = "usage: %prog [options] file"
@@ -41,7 +41,7 @@ def main():
   optimized = optimize(parsing)
   in_file.close()
 
-  out = write_statements(optimized)
+  out = createAssemblyCode(optimized)
   out_file.write(out)
   out_file.close()
 
