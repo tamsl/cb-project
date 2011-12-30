@@ -2,7 +2,7 @@
 import sys
 from optparse import OptionParser
 
-from parser import parse
+from parse_yacc import parse
 from optimize import *
 
 def main():
