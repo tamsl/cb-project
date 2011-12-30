@@ -2,7 +2,7 @@ import ply.yacc as yacc
 from parse_lex import tokens
 from peep import Expression
 
-precedence = 'system'
+beginning = 'system'
 
 def p_system(p):
   '''
