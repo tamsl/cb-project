@@ -1,12 +1,11 @@
 from copy import copy
-from statement import Block
+from peep import Block
 
 class BasicBlock(Block):
     def __init__(self, statements=[]):
         Block.__init__(self, statements)
         self.edges_to = []
         self.edges_from = []
-
         self.dominates = []
         self.dominated_by = []
         self.in_set = set([])
@@ -14,7 +13,7 @@ class BasicBlock(Block):
         self.gen_set = set([])
         self.kill_set = set([])
 
-    def add_edge_to(self, block):
+    def edges(self, block):
         if block not in self.edges_to:
             self.edges_to.append(block)
             block.edges_from.append(self)
@@ -60,7 +59,6 @@ def defs(blocks):
                     defs[reg] = set([s.sid])
                 else:
                     defs[reg].add(s.sid)
-
     return defs
 
 def find_basic_blocks(statements):
