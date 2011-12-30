@@ -6,9 +6,8 @@ tokens = (
   'COMMA',
   'COMMENT',
   'DIRECTIVE',
-  'DECI',
-  'HEXI',
-  'OFFSET'
+  'NEWLINE',
+  'WORD'
 )
 
 def t_COLON(tok):
@@ -27,25 +26,49 @@ def t_DIRECTIVE(tok):
   r'\..+'
   return tok
 
-def t_DECI(tok):
-  r'[0-9]+'
+def t_NEWLINE(t):
+  r'\n+'
+  t.lexer.lineno += t.value.count('\n')
   return tok
 
-def t_HEXI(tok):
-  r'0x[0-9]{8}'
+def t_hex_word(t):
+  r'0x([0-9a-fA-F]{8}|[0-9a-fA-F]{4})'
+  t.type = 'WORD'
   return tok
 
-def t_OFFSET(tok):
+def t_offset_address(t):
   r'[0-9]+\([a-zA-Z0-9$_.]+\)'
+  t.type = 'WORD'
   return tok
+
+def t_int(t):
+  r'-?[0-9]+'
+  t.type = 'WORD'
+  return tok
+
+def t_WORD(t):
+  r'[a-zA-Z0-9$_.+()-]+'
+  return tok
+
+#def t_DECI(tok):
+#  r'[0-9]+'
+#  return tok
+
+#def t_HEXI(tok):
+#  r'0x[0-9]{8}'
+#  return tok
+
+#def t_OFFSET(tok):
+#  r'[0-9]+\([a-zA-Z0-9$_.]+\)'
+#  return tok
 
 # Handle errors
 def t_error(tok):
   print("Illegal token '%s'" % tok.value[0])
   t.lexer.skip(1)
 
-# '[ \t\n]'
-t_ignore  = ' \t\n'
+# '[ \t\n]' ' \t\n'
+t_ignore  = ' \t'
 
 # Build the lexer
 lexer = lex.lex()

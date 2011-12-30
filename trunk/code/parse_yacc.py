@@ -1,6 +1,8 @@
 import ply.yacc as yacc
 from parse_lex import tokens
-from peep import Expression
+from peep import Expression, Block
+
+expressions = []
 
 beginning = 'system'
 
@@ -12,21 +14,21 @@ def p_system(p):
 
 def p_comment(p):
   '''
-  list : COMMENT
+  list : COMMENT NEWLINE
   '''
-  expr.append(Expression('comment', p[1]))
+  expressions.append(Expression('comment', p[1], inline=False))
+
+def p_instruction_comment(p):
+  '''
+  list : instruction COMMENT NEWLINE
+  '''
+  expressions.append(S('comment', p[2], inline=True))
 
 def p_instruction(p):
   '''
-  list : instruction
+  list : instruction NEWLINE
   '''
   pass
-
-def p_directive(p):
-  '''
-  instruction : DIRECTIVE
-  '''
-  expr.append(Expression('directive', p[1]))
 
 def p_instr_command(p):
   '''
@@ -34,23 +36,26 @@ def p_instr_command(p):
   '''
   pass
 
+def p_directive(p):
+  '''
+  instruction : DIRECTIVE
+  '''
+  expressions.append(Expression('directive', p[1]))
+
+def p_label(p):
+  '''
+  instruction : WORD COLON
+  '''
+  expressions.append(Expression('label', p[1]))
+
 def p_command(p):
   '''
-  command : 
-  | argument argument argument 
-  | argument argument 
-  | argument 
+  command : WORD WORD COMMA WORD COMMA WORD
+          | WORD WORD COMMA WORD
+          | WORD WORD
+          | WORD
   '''
-  expr.append(Expression('command', p[1]))
-
-def p_argument(p):
-  '''
-  argument : 
-  | OFFSET
-  | DECI 
-  | HEXI
-  '''
-  expr.append(Expression('label', p[1]))
+  expressions.append(Expression('command', p[1], *list(p)[2::2]))
 
 def p_error(p):
   pass
@@ -59,7 +64,9 @@ def p_error(p):
 parser = yacc.yacc() 
 
 def parse(p):
-  expr = []
+  global expressions
+  expressions = []
+
   try:
     to_parse = open(p).read()
     yacc.parse(to_parse)
@@ -68,4 +75,4 @@ def parse(p):
   parsed = parser.parse(to_parse)
   print parsed
 
-  return Block(expr)
+  return Block(expressions)
