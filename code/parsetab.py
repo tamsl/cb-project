@@ -5,9 +5,9 @@ _tabversion = '3.2'
 
 _lr_method = 'LALR'
 
-_lr_signature = '\xe0x\xa5\x93<\n\x15\xc2\xae\xe3]\xe0\t\x85\x8ay'
+_lr_signature = '\xe1\xd7\x14\x1a8\xa0\xdd\xfe7\x07\xad \xf3\xd1\xf2t'
     
-_lr_action_items = {'COMMENT':([0,],[1,]),'HEXI':([0,2,3,8,10,11,],[2,-13,-12,2,-11,2,]),'DECI':([0,2,3,8,10,11,],[3,-13,-12,3,-11,3,]),'DIRECTIVE':([0,],[4,]),'OFFSET':([0,2,3,8,10,11,],[10,-13,-12,10,-11,10,]),'$end':([0,1,2,3,4,5,6,7,8,9,10,11,12,],[-6,-2,-13,-12,-4,-3,-1,0,-9,-5,-11,-8,-7,]),}
+_lr_action_items = {'COMMENT':([0,2,3,4,7,9,10,15,17,],[1,-11,-6,11,-5,-7,-10,-9,-8,]),'WORD':([0,2,13,16,],[2,10,15,17,]),'DIRECTIVE':([0,],[3,]),'NEWLINE':([1,2,3,4,7,9,10,11,15,17,],[8,-11,-6,12,-5,-7,-10,14,-9,-8,]),'COLON':([2,],[9,]),'COMMA':([10,15,],[13,16,]),'$end':([5,6,8,12,14,],[-1,0,-2,-4,-3,]),}
 
 _lr_action = { }
 for _k, _v in _lr_action_items.items():
@@ -16,7 +16,7 @@ for _k, _v in _lr_action_items.items():
       _lr_action[_x][_k] = _y
 del _lr_action_items
 
-_lr_goto_items = {'command':([0,],[9,]),'instruction':([0,],[5,]),'list':([0,],[6,]),'system':([0,],[7,]),'argument':([0,8,11,],[8,11,12,]),}
+_lr_goto_items = {'command':([0,],[7,]),'instruction':([0,],[4,]),'list':([0,],[5,]),'system':([0,],[6,]),}
 
 _lr_goto = { }
 for _k, _v in _lr_goto_items.items():
@@ -26,17 +26,15 @@ for _k, _v in _lr_goto_items.items():
 del _lr_goto_items
 _lr_productions = [
   ("S' -> system","S'",1,None,None,None),
-  ('system -> list','system',1,'p_system','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',9),
-  ('list -> COMMENT','list',1,'p_comment','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',15),
-  ('list -> instruction','list',1,'p_instruction','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',21),
-  ('instruction -> DIRECTIVE','instruction',1,'p_directive','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',27),
-  ('instruction -> command','instruction',1,'p_instr_command','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',33),
-  ('command -> <empty>','command',0,'p_command','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',39),
-  ('command -> argument argument argument','command',3,'p_command','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',40),
-  ('command -> argument argument','command',2,'p_command','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',41),
-  ('command -> argument','command',1,'p_command','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',42),
-  ('argument -> <empty>','argument',0,'p_argument','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',48),
-  ('argument -> OFFSET','argument',1,'p_argument','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',49),
-  ('argument -> DECI','argument',1,'p_argument','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',50),
-  ('argument -> HEXI','argument',1,'p_argument','/home/alexandra/Desktop/cb-project/code/parse_yacc.py',51),
+  ('system -> list','system',1,'p_system','parse_yacc.py',11),
+  ('list -> COMMENT NEWLINE','list',2,'p_comment','parse_yacc.py',17),
+  ('list -> instruction COMMENT NEWLINE','list',3,'p_instruction_comment','parse_yacc.py',23),
+  ('list -> instruction NEWLINE','list',2,'p_instruction','parse_yacc.py',29),
+  ('instruction -> command','instruction',1,'p_instr_command','parse_yacc.py',35),
+  ('instruction -> DIRECTIVE','instruction',1,'p_directive','parse_yacc.py',41),
+  ('instruction -> WORD COLON','instruction',2,'p_label','parse_yacc.py',47),
+  ('command -> WORD WORD COMMA WORD COMMA WORD','command',6,'p_command','parse_yacc.py',52),
+  ('command -> WORD WORD COMMA WORD','command',4,'p_command','parse_yacc.py',53),
+  ('command -> WORD WORD','command',2,'p_command','parse_yacc.py',54),
+  ('command -> WORD','command',1,'p_command','parse_yacc.py',55),
 ]
