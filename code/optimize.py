@@ -8,8 +8,8 @@ def moves(opt, expr, t):
     if opt.checkCommand('opt'):
       if opt[0] == opt[1]:
         expr.substitute(1, [])
-
         return 1
+
   # Original sequence       | Replacement
   # mov $regA, $regB        | instr $regA, $regB,...
   # instr $regA, $regA, ... |
@@ -19,8 +19,8 @@ def moves(opt, expr, t):
       if ex and ((ex[0] and ex[1]) == opt[0]) and len(ex) > 1:
         ex[1] = opt[1]
         expr.substitute(2, [ex])
-
         return 1
+
   # Original sequence | Replacement
   # instr $regA, ...  | instr $4, ...
   # mov $4, $regA     | jal XX
@@ -34,8 +34,8 @@ def moves(opt, expr, t):
           if re.match('^\$[4-7]$', instr[0]) and jal.checkCommand('jal'):
             opt[0] = instr[0]
             expr.substitute(2, [opt])
-
             return 1
+
   # Original sequence | Replacement
   # mov $regA, $regB  | move $regA, $regB
   # mov $regB, $regA  |
@@ -44,42 +44,10 @@ def moves(opt, expr, t):
       mov = expr.readExpressionOffset()
       if mov.checkCommand('move') and opt[1] == mov[0] and opt[0] == mov[1] :
         expr.substitute(2, [opt])
-
         return 1
+
   else:
     return 0
-
-# Original sequence | Replacement
-# sw $regA, XX      |  sw $regA, XX
-# ld $regA, XX
-def optimize_ld(opt, expr):
-  if opt.checkCommand('sw'):
-    load = expr.readExpressionOffset()
-    if load.args == opt.args and load.checkCommand('lw'):
-      expr.substitute(2, [opt])
-
-      return 1
-
-# Original sequence     | Replacement
-# shift $regA, $regA, 0 |  --- (remove)
-# (shift = sll, sla, srl, sra)
-def zero_shift(opt, expr):
-  if opt[0] == opt[1] and opt[2] == 0 and opt.checkShift():
-    expr.substitute(1, [])
-
-    return 1
-
-# Original sequence    | Replacement
-# add $regA, $regA, X  | lw ..., X($regA)
-# lw ..., 0($regA)
-def optimize_lw(opt, expr):
-  if opt.checkCommand('addu') and opt[0] == opt[1] and isinstance(add[2], int):
-    ex = expr.readExpressionOffset()
-    if lw.checkLoad() and ex[-1] == '0(%s)' % opt[0]:
-      ex[-1] = '%s(%s)' % (opt[2], opt[0])
-      expr.substitute(2, [ex])
-
-      return 1
 
 # Original sequence  | Replacement
 #   beq/bne ..., $Lx |   bne/beq ..., $Ly
@@ -102,3 +70,32 @@ def beq_bne(expr):
               e.name = 'beq'
             e[2] = j[0]
             expr.substitute(3, [e, i])
+
+# Original sequence | Replacement
+# sw $regA, XX      |  sw $regA, XX
+# ld $regA, XX
+def optimize_ld(opt, expr):
+  if opt.checkCommand('sw'):
+    load = expr.readExpressionOffset()
+    if load.args == opt.args and load.checkCommand('lw'):
+      expr.substitute(2, [opt])
+      return 1
+
+# Original sequence    | Replacement
+# add $regA, $regA, X  | lw ..., X($regA)
+# lw ..., 0($regA)
+def optimize_lw(opt, expr):
+  if opt.checkCommand('addu') and opt[0] == opt[1] and isinstance(add[2], int):
+    ex = expr.readExpressionOffset()
+    if lw.checkLoad() and ex[-1] == '0(%s)' % opt[0]:
+      ex[-1] = '%s(%s)' % (opt[2], opt[0])
+      expr.substitute(2, [ex])
+      return 1
+
+# Original sequence     | Replacement
+# shift $regA, $regA, 0 |  --- (remove)
+# (shift = sll, sla, srl, sra)
+def zero_shift(opt, expr):
+  if opt[0] == opt[1] and opt[2] == 0 and opt.checkShift():
+    expr.substitute(1, [])
+    return 1
