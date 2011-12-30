@@ -1,6 +1,12 @@
 from math import ceil
 import re
 
+# Write the created assembly code in the file.
+def writeAssemblyCodeInFile(fileName, expressions):
+  theFile = open(fileName, 'w+')
+  theFile.write(createAssemblyCode(expressions))
+  theFile.close()
+
 # Create assembly code using a list of expressions. 
 def createAssemblyCode(expressions):
   assemblyCode = ''
@@ -37,12 +43,6 @@ def createAssemblyCode(expressions):
     previous = line
 
   return assemblyCode + '\n'
-
-# Write the created assembly code in the file.
-def writeAssemblyCodeInFile(fileName, expressions):
-  theFile = open(fileName, 'w+')
-  theFile.write(createAssemblyCode(expressions))
-  theFile.close()
 
 class Block:
   def __init__(self, expressions = []):
@@ -206,11 +206,25 @@ class Expression:
       if self.name == cmds[i] and self.checkCommand() == True:
         return True
 
-    return False    
+    return False  
+
+  def checkLoad2(self):
+    if re.match('^l(bu|a|w||\.s|b|\.d)|dlw$', self.name) \
+       and self.checkCommand() == True:
+      return True
+    else:
+      return False  
 
   def checkArithmetic(self):
     if re.match('^s(rl|ra|ll)|(and|neg|mflo|mfhi|abs|[xn]?or)|(slt|add|sub)u?'
                 + '|sqrt|neg|div|abs|mult|c|add|sub)\.[sd]$', self.name) \
+       and self.checkCommand() == True:
+      return True
+    else:
+      return False
+
+  def checkArithmeticD(self):
+    if re.match('^(div|add|mul|sub)\.d$', self.name) \
        and self.checkCommand() == True:
       return True
     else:
@@ -233,9 +247,22 @@ class Expression:
     else:
       return False
 
-  def checkLoad2(self):
-    if re.match('^l(bu|a|w||\.s|b|\.d)|dlw$', self.name) \
-       and self.checkCommand() == True:
+  def checkMove(self):
+    cmds = ['mthi', 'mflo'] 
+    for i in range(0, len(cmds)):
+      if self.name == cmds[i] and self.checkCommand() == True:
+        return True
+ 
+    return False
+
+  def checkTruncate(self):
+    if re.match('^trunc\.[a-z\.]*$', self.name) and self.checkCommand() == True:
+      return True
+    else:
+      return False
+
+  def checkConvert(self):
+    if re.match('^cvt\.[a-z\.]*$', self.name) and self.checkCommand() == True:
       return True
     else:
       return False
@@ -246,26 +273,11 @@ class Expression:
     else:
       return False
 
-  def checkArithmeticD(self):
-    if re.match('^(div|add|mul|sub)\.d$', self.name) \
-       and self.checkCommand() == True:
-      return True
-    else:
-      return False
-
   def checkUnaryD(self):
     if re.match('^(neg|abs|mov)\.d$', self.name) and self.checkCommand() == True:
       return True
     else:
       return False
-  
-  def checkMove(self):
-    cmds = ['mthi', 'mflo'] 
-    for i in range(0, len(cmds)):
-      if self.name == cmds[i] and self.checkCommand() == True:
-        return True
- 
-    return False
   
   def checkShift2(self):
     cmds = ['sltu', 'slt']
@@ -276,17 +288,13 @@ class Expression:
    
     return False
 
-  def checkConvert(self):
-    if re.match('^cvt\.[a-z\.]*$', self.name) and self.checkCommand() == True:
-      return True
-    else:
-      return False
+  def checkDefinition(self, register):
+    definition = self.retrieve()
+    return register in definition
 
-  def checkTruncate(self):
-    if re.match('^trunc\.[a-z\.]*$', self.name) and self.checkCommand() == True:
-      return True
-    else:
-      return False
+  def checkUsage(self, register):
+    usage = self.retrieveUsage()
+    return register in usage
 
   def getTargetJump(self):
     if self.checkJump() == True:
@@ -322,11 +330,3 @@ class Expression:
       retrieved = retrieved + self[1:]
 
     return retrieved
-   
-  def checkDefinition(self, register):
-    definition = self.retrieve()
-    return register in definition
-
-  def checkUsage(self, register):
-    usage = self.retrieveUsage()
-    return register in usage

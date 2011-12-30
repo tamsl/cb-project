@@ -99,3 +99,48 @@ def zero_shift(opt, expr):
   if opt[0] == opt[1] and opt[2] == 0 and opt.checkShift():
     expr.substitute(1, [])
     return 1
+
+def getRidOfRedundancy(block):
+  previousLength = -10
+  switch = False
+  funcs = [optimze_ld, zero_shift, optimize_lw]
+  cmds = ['remove', 'replace', 'jal', 'move']
+
+  while len(block) != previousLength:
+    previousLength = len(block)
+
+    while block.checkPosition() == False:
+      expression = block.read()
+
+      for cmd in cmds:
+        if moves(expression, block, cmd) == True:
+          switch = True
+          break
+       
+      for func in funcs:
+        if func(expression, block):
+          switch = True
+          break
+
+  return switch
+
+def optimizer(expressions, var = 0):
+  lengths = []
+  lengths.append(len(expressions))
+  beq_bne(expressions)
+  lengths.append(len(expressions))
+
+  blocks = findBBs(expressions) #find_basic_blocks
+  blockExpressions = map(lamda blck: blck.expressions, blocks)
+  optimizedBlocks = reduce(lambda x, y: x + y, blockExpressions)
+  lengths.append(len(optimizedBlocks))
+
+  if var:
+      print 'Expressions:               %d' % lengths[0]
+      print 'After optimization:        %d' % lengths[1]
+      print 'After BB optimization      %d' % lengths[2]
+  
+ return optimizedBlocks
+
+  return optimizedBlocks
+
