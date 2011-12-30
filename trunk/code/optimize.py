@@ -141,6 +141,3 @@ def optimizer(expressions, var = 0):
       print 'After BB optimization      %d' % lengths[2]
   
  return optimizedBlocks
-
-  return optimizedBlocks
-
