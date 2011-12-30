@@ -1,13 +1,13 @@
 import re
 
-def moves(opt, expr, t):
+def moves(opt, expressions, t):
   # Original sequence | Replacement
   # mov $regA, $regB  | --- (remove)
   # (with $regA == $regB)
   if t == 'remove':
     if opt.checkCommand('opt'):
       if opt[0] == opt[1]:
-        expr.substitute(1, [])
+        expressions.substitute(1, [])
         return 1
 
   # Original sequence       | Replacement
@@ -15,10 +15,10 @@ def moves(opt, expr, t):
   # instr $regA, $regA, ... |
   elif t == 'replace':
     if opt.checkCommand('opt'):
-      ex = expr.readExpressionOffset()
+      ex = expressions.readExpressionOffset()
       if ex and ((ex[0] and ex[1]) == opt[0]) and len(ex) > 1:
         ex[1] = opt[1]
-        expr.substitute(2, [ex])
+        expressions.substitute(2, [ex])
         return 1
 
   # Original sequence | Replacement
@@ -27,13 +27,13 @@ def moves(opt, expr, t):
   # jal XX            |
   elif t == 'jal':
     if opt.checkCommand() and len(opt) > 0:
-      ex = expr.readExpressionOffset(2)
+      ex = expressions.readExpressionOffset(2)
       if len(ex) > 1:
         instr, jal = ex
         if opt[0] == instr[1] and instr.checkCommand('move'):
           if re.match('^\$[4-7]$', instr[0]) and jal.checkCommand('jal'):
             opt[0] = instr[0]
-            expr.substitute(2, [opt])
+            expressions.substitute(2, [opt])
             return 1
 
   # Original sequence | Replacement
@@ -41,9 +41,9 @@ def moves(opt, expr, t):
   # mov $regB, $regA  |
   elif t == 'move':
     if opt.checkCommand('move'):
-      mov = expr.readExpressionOffset()
+      mov = expressions.readExpressionOffset()
       if mov.checkCommand('move') and opt[1] == mov[0] and opt[0] == mov[1] :
-        expr.substitute(2, [opt])
+        expressions.substitute(2, [opt])
         return 1
 
   else:
@@ -53,14 +53,14 @@ def moves(opt, expr, t):
 #   beq/bne ..., $Lx |   bne/beq ..., $Ly
 #   j $Ly            | $Lx:
 # $Lx:
-def beq_bne(expr):
+def beq_bne(expressions):
   prev = -1
-  while prev != len(expr):
-    prev = len(expr)
-    while not expr.end():
-      e = expr.read()
+  while prev != len(expressions):
+    prev = len(expressions)
+    while not expressions.end():
+      e = expressions.read()
       if e.checkCommand('beq', 'bne'):
-        ex = expr.readExpressionOffset(2)
+        ex = expressions.readExpressionOffset(2)
         if len(ex) == 2:
           j, i = ex
           if j.checkCommand('j') and i.checkLabel(e[2]):
@@ -69,56 +69,53 @@ def beq_bne(expr):
             else:
               e.name = 'beq'
             e[2] = j[0]
-            expr.substitute(3, [e, i])
+            expressions.substitute(3, [e, i])
 
 # Original sequence | Replacement
 # sw $regA, XX      |  sw $regA, XX
 # ld $regA, XX
-def optimize_ld(opt, expr):
+def optimize_ld(opt, expressions):
   if opt.checkCommand('sw'):
-    load = expr.readExpressionOffset()
+    load = expressions.readExpressionOffset()
     if load.args == opt.args and load.checkCommand('lw'):
-      expr.substitute(2, [opt])
+      expressions.substitute(2, [opt])
       return 1
 
 # Original sequence    | Replacement
 # add $regA, $regA, X  | lw ..., X($regA)
 # lw ..., 0($regA)
-def optimize_lw(opt, expr):
+def optimize_lw(opt, expressions):
   if opt.checkCommand('addu') and opt[0] == opt[1] and isinstance(add[2], int):
-    ex = expr.readExpressionOffset()
+    ex = expressions.readExpressionOffset()
     if lw.checkLoad() and ex[-1] == '0(%s)' % opt[0]:
       ex[-1] = '%s(%s)' % (opt[2], opt[0])
-      expr.substitute(2, [ex])
+      expressions.substitute(2, [ex])
       return 1
 
 # Original sequence     | Replacement
 # shift $regA, $regA, 0 |  --- (remove)
 # (shift = sll, sla, srl, sra)
-def zero_shift(opt, expr):
+def zero_shift(opt, expressions):
   if opt[0] == opt[1] and opt[2] == 0 and opt.checkShift():
-    expr.substitute(1, [])
+    expressions.substitute(1, [])
     return 1
 
 def getRidOfRedundancy(block):
-  previousLength = -10
+  prev = -10
   switch = False
   funcs = [optimze_ld, zero_shift, optimize_lw]
   cmds = ['remove', 'replace', 'jal', 'move']
 
-  while len(block) != previousLength:
-    previousLength = len(block)
-
+  while len(block) != prev:
+    prev = len(block)
     while block.checkPosition() == False:
-      expression = block.read()
-
+      ex = block.read()
       for cmd in cmds:
-        if moves(expression, block, cmd) == True:
+        if moves(ex, block, cmd) == True:
           switch = True
           break
-       
       for func in funcs:
-        if func(expression, block):
+        if func(ex, block):
           switch = True
           break
 
@@ -130,14 +127,14 @@ def optimizer(expressions, var = 0):
   beq_bne(expressions)
   lengths.append(len(expressions))
 
-  blocks = findBBs(expressions) #find_basic_blocks
+  blocks = bbs_find(expressions)
   blockExpressions = map(lamda blck: blck.expressions, blocks)
   optimizedBlocks = reduce(lambda x, y: x + y, blockExpressions)
   lengths.append(len(optimizedBlocks))
 
   if var:
-      print 'Expressions:               %d' % lengths[0]
-      print 'After optimization:        %d' % lengths[1]
-      print 'After BB optimization      %d' % lengths[2]
+    print 'Expressions:     %d' % lengths[0]
+    print 'Optimization:    %d' % lengths[1]
+    print 'BB optimization: %d' % lengths[2]
   
  return optimizedBlocks
