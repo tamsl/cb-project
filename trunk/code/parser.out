@@ -1,0 +1,222 @@
+Created by PLY version 3.3 (http://www.dabeaz.com/ply)
+
+Unused terminals:
+
+    COMMA
+    COLON
+
+Grammar
+
+Rule 0     S' -> system
+Rule 1     system -> list
+Rule 2     list -> COMMENT
+Rule 3     list -> instruction
+Rule 4     instruction -> DIRECTIVE
+Rule 5     instruction -> command
+Rule 6     command -> <empty>
+Rule 7     command -> argument argument argument
+Rule 8     command -> argument argument
+Rule 9     command -> argument
+Rule 10    argument -> <empty>
+Rule 11    argument -> OFFSET
+Rule 12    argument -> DECI
+Rule 13    argument -> HEXI
+
+Terminals, with rules where they appear
+
+COLON                : 
+COMMA                : 
+COMMENT              : 2
+DECI                 : 12
+DIRECTIVE            : 4
+HEXI                 : 13
+OFFSET               : 11
+error                : 
+
+Nonterminals, with rules where they appear
+
+argument             : 7 7 7 8 8 9
+command              : 5
+instruction          : 3
+list                 : 1
+system               : 0
+
+Parsing method: LALR
+
+state 0
+
+    (0) S' -> . system
+    (1) system -> . list
+    (2) list -> . COMMENT
+    (3) list -> . instruction
+    (4) instruction -> . DIRECTIVE
+    (5) instruction -> . command
+    (6) command -> .
+    (7) command -> . argument argument argument
+    (8) command -> . argument argument
+    (9) command -> . argument
+    (10) argument -> .
+    (11) argument -> . OFFSET
+    (12) argument -> . DECI
+    (13) argument -> . HEXI
+
+  ! reduce/reduce conflict for $end resolved using rule 6 (command -> .)
+  ! shift/reduce conflict for OFFSET resolved as shift
+  ! shift/reduce conflict for DECI resolved as shift
+  ! shift/reduce conflict for HEXI resolved as shift
+    COMMENT         shift and go to state 1
+    DIRECTIVE       shift and go to state 4
+    $end            reduce using rule 6 (command -> .)
+    OFFSET          shift and go to state 10
+    DECI            shift and go to state 3
+    HEXI            shift and go to state 2
+
+  ! OFFSET          [ reduce using rule 10 (argument -> .) ]
+  ! DECI            [ reduce using rule 10 (argument -> .) ]
+  ! HEXI            [ reduce using rule 10 (argument -> .) ]
+  ! $end            [ reduce using rule 10 (argument -> .) ]
+
+    command                        shift and go to state 9
+    instruction                    shift and go to state 5
+    list                           shift and go to state 6
+    system                         shift and go to state 7
+    argument                       shift and go to state 8
+
+state 1
+
+    (2) list -> COMMENT .
+
+    $end            reduce using rule 2 (list -> COMMENT .)
+
+
+state 2
+
+    (13) argument -> HEXI .
+
+    OFFSET          reduce using rule 13 (argument -> HEXI .)
+    DECI            reduce using rule 13 (argument -> HEXI .)
+    HEXI            reduce using rule 13 (argument -> HEXI .)
+    $end            reduce using rule 13 (argument -> HEXI .)
+
+
+state 3
+
+    (12) argument -> DECI .
+
+    OFFSET          reduce using rule 12 (argument -> DECI .)
+    DECI            reduce using rule 12 (argument -> DECI .)
+    HEXI            reduce using rule 12 (argument -> DECI .)
+    $end            reduce using rule 12 (argument -> DECI .)
+
+
+state 4
+
+    (4) instruction -> DIRECTIVE .
+
+    $end            reduce using rule 4 (instruction -> DIRECTIVE .)
+
+
+state 5
+
+    (3) list -> instruction .
+
+    $end            reduce using rule 3 (list -> instruction .)
+
+
+state 6
+
+    (1) system -> list .
+
+    $end            reduce using rule 1 (system -> list .)
+
+
+state 7
+
+    (0) S' -> system .
+
+
+
+state 8
+
+    (7) command -> argument . argument argument
+    (8) command -> argument . argument
+    (9) command -> argument .
+    (10) argument -> .
+    (11) argument -> . OFFSET
+    (12) argument -> . DECI
+    (13) argument -> . HEXI
+
+  ! reduce/reduce conflict for $end resolved using rule 9 (command -> argument .)
+  ! shift/reduce conflict for OFFSET resolved as shift
+  ! shift/reduce conflict for DECI resolved as shift
+  ! shift/reduce conflict for HEXI resolved as shift
+    $end            reduce using rule 9 (command -> argument .)
+    OFFSET          shift and go to state 10
+    DECI            shift and go to state 3
+    HEXI            shift and go to state 2
+
+  ! OFFSET          [ reduce using rule 10 (argument -> .) ]
+  ! DECI            [ reduce using rule 10 (argument -> .) ]
+  ! HEXI            [ reduce using rule 10 (argument -> .) ]
+  ! $end            [ reduce using rule 10 (argument -> .) ]
+
+    argument                       shift and go to state 11
+
+state 9
+
+    (5) instruction -> command .
+
+    $end            reduce using rule 5 (instruction -> command .)
+
+
+state 10
+
+    (11) argument -> OFFSET .
+
+    OFFSET          reduce using rule 11 (argument -> OFFSET .)
+    DECI            reduce using rule 11 (argument -> OFFSET .)
+    HEXI            reduce using rule 11 (argument -> OFFSET .)
+    $end            reduce using rule 11 (argument -> OFFSET .)
+
+
+state 11
+
+    (7) command -> argument argument . argument
+    (8) command -> argument argument .
+    (10) argument -> .
+    (11) argument -> . OFFSET
+    (12) argument -> . DECI
+    (13) argument -> . HEXI
+
+  ! reduce/reduce conflict for $end resolved using rule 8 (command -> argument argument .)
+    $end            reduce using rule 8 (command -> argument argument .)
+    OFFSET          shift and go to state 10
+    DECI            shift and go to state 3
+    HEXI            shift and go to state 2
+
+  ! $end            [ reduce using rule 10 (argument -> .) ]
+
+    argument                       shift and go to state 12
+
+state 12
+
+    (7) command -> argument argument argument .
+
+    $end            reduce using rule 7 (command -> argument argument argument .)
+
+WARNING: 
+WARNING: Conflicts:
+WARNING: 
+WARNING: shift/reduce conflict for OFFSET in state 0 resolved as shift
+WARNING: shift/reduce conflict for DECI in state 0 resolved as shift
+WARNING: shift/reduce conflict for HEXI in state 0 resolved as shift
+WARNING: shift/reduce conflict for OFFSET in state 8 resolved as shift
+WARNING: shift/reduce conflict for DECI in state 8 resolved as shift
+WARNING: shift/reduce conflict for HEXI in state 8 resolved as shift
+WARNING: reduce/reduce conflict in state 0 resolved using rule (command -> <empty>)
+WARNING: rejected rule (argument -> <empty>) in state 0
+WARNING: reduce/reduce conflict in state 8 resolved using rule (command -> argument)
+WARNING: rejected rule (argument -> <empty>) in state 8
+WARNING: reduce/reduce conflict in state 11 resolved using rule (command -> argument argument)
+WARNING: rejected rule (argument -> <empty>) in state 11
+WARNING: Rule (argument -> <empty>) is never reduced
