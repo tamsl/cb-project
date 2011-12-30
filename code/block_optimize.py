@@ -1,75 +1,81 @@
-from copy import copy
 from peep import Block
 
-class BasicBlock(Block):
-    def __init__(self, statements=[]):
-        Block.__init__(self, statements)
-        self.edges_to = []
-        self.edges_from = []
-        self.dominates = []
-        self.dominated_by = []
-        self.in_set = set([])
-        self.out_set = set([])
-        self.gen_set = set([])
-        self.kill_set = set([])
+def bbs_find(expressions):
+    len_expr = len(head(expressions)) - 1
+    bs_hd = expressions[heads[-1]:]
+    bs = []
+    for x in range(len_expr):
+        bs_expr = expressions[heads[i]:heads[x + 1]
+        bs.append(bb(bs_expr))
+        heads = head(expressions)
+    bs.append(bb(bs_hd))
+    return bs
 
-    def edges(self, block):
-        if block not in self.edges_to:
-            self.edges_to.append(block)
-            block.edges_from.append(self)
+def head(expressions):
+    heads = [0]
+    tar = []
+    next = x + 1
+    for x, expression in enumerate(expressions[1:]):
+        if expression.checkLabel() and next not in heads \
+                and expression.name in tar:
+            heads.append(next)
+        if expression.checkJump():
+            heads.append(x + 2)
+            tar.append(expression[-1])
+    heads.sort()
+    return heads
 
-    def set_dominates(self, block):
-        if block not in self.dominates:
-            self.dominates.append(block)
-            block.dominated_by.append(self)
-
-    def create_gen_kill(self, defs):
-        used = set()
-        self_defs = {}
-
-        # Get the last of each definition series and put in in the `def' set
-        self.gen_set = set()
-
-        for s in reversed(self):
-            for reg in s.get_def():
-                if reg not in self_defs:
-                    print 'Found def:', s
-                    self_defs[reg] = s.sid
-                    self.gen_set.add(s.sid)
-
-        # Generate kill set
-        self.kill_set = set()
-
-        for reg, statement_ids in defs.iteritems():
-            if reg in self_defs:
-                add = statement_ids - set([self_defs[reg]])
-            else:
-                add = statement_ids
-
-            self.kill_set |= add
-
-def defs(blocks):
-    # Collect definitions of all registers
-    defs = {}
-
-    for b in blocks:
-        for s in b:
-            for reg in s.get_def():
-                if reg not in defs:
-                    defs[reg] = set([s.sid])
-                else:
-                    defs[reg].add(s.sid)
+def definitions(bs):
+    def_bs = {}
+    for b in bs 
+      for  def_set in b:
+        for def_register not in defs_bs 
+          if def_register not in def_set.checkDefinition():
+            defs_bs[def_register].add(def_set.sid)
+          else:
+            id_set = set([def_set.sid])
+            defs_bs[def_register] = id_set
     return defs
 
-def find_basic_blocks(statements):
-    """Divide a statement list into basic blocks. Returns a list of basic
-    blocks, which are also statement lists."""
-    leaders = find_leaders(statements)
-    blocks = []
+class bb(Block):
+    def __init__(self, expressions=[]):
+        Block.__init__(self, expressions)
+        self.force = []
+        self.forced = []
+        self.edges1 = []
+        self.edges2 = []
+        self.setKill = set([])
+        self.setGen = set([])
 
-    for i in range(len(leaders) - 1):
-        blocks.append(BasicBlock(statements[leaders[i]:leaders[i + 1]]))
+    def forcing(self, b):
+        for1 = self.force
+        for2 = self.forced
+        if b not in for1:
+            for1.append(b)
+            for2.append(b)
 
-    blocks.append(BasicBlock(statements[leaders[-1]:]))
+    def edges(self, b):
+        edge_i = self.edges1
+        edge_o = self.edges2
+        if b not in edge_o:
+            edge_o.append(b)
+            edge_i.append(b)
 
-    return blocks
+    def sets(self, definitions):
+        handled_set = set()
+        self.setKill = set()
+        self.setGen = set()
+        rev = reversed(self)
+        defs = {}
+        for def_register, id_expr in defs.iteritems():
+            if def_register not in defs:
+                count = id_expr
+            else:
+                count = id_expr - set([defs[def_register]])
+            self.setKill |= count
+        for def_set in rev:
+          for def_register in def_set.checkDefinition():
+                if def_register not in defs:
+                    print 'Found def:', def_set
+                    defs[def_register] = def_set.sid
+                    self.setGen.add(def_set.sid)
