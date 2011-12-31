@@ -54,8 +54,8 @@ def t_WORD(tok):
 t_ignore = ' \t'
 
 def t_error(tok):
-    print('Illegal character "%s"' % t.value[0])
-    t.lexer.skip(1)
+    print('Illegal character "%s"' % tok.value[0])
+    tok.lexer.skip(1)
 
 # Build the lexer
 lexer = lex.lex()
