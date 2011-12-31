@@ -1,35 +1,36 @@
-Created by PLY version 3.3 (http://www.dabeaz.com/ply)
+Created by PLY version 3.4 (http://www.dabeaz.com/ply)
 
 Grammar
 
 Rule 0     S' -> system
 Rule 1     system -> <empty>
 Rule 2     system -> system list
-Rule 3     list -> instruction NEWLINE
-Rule 4     list -> COMMENT NEWLINE
-Rule 5     list -> instruction COMMENT NEWLINE
-Rule 6     instruction -> command
-Rule 7     instruction -> DIRECTIVE
-Rule 8     instruction -> WORD COLON
-Rule 9     command -> WORD WORD COMMA WORD COMMA WORD
-Rule 10    command -> WORD WORD COMMA WORD
-Rule 11    command -> WORD WORD
-Rule 12    command -> WORD
+Rule 3     list -> instr NEWLINE
+Rule 4     list -> NOTE NEWLINE
+Rule 5     list -> instr NOTE NEWLINE
+Rule 6     instr -> control
+Rule 7     instr -> DIRECT
+Rule 8     instr -> NUMB COLON
+Rule 9     control -> <empty>
+Rule 10    control -> NUMB NUMB COMMA NUMB COMMA NUMB
+Rule 11    control -> NUMB NUMB COMMA NUMB
+Rule 12    control -> NUMB NUMB
+Rule 13    control -> NUMB
 
 Terminals, with rules where they appear
 
 COLON                : 8
-COMMA                : 9 9 10
-COMMENT              : 4 5
-DIRECTIVE            : 7
+COMMA                : 10 10 11
+DIRECT               : 7
 NEWLINE              : 3 4 5
-WORD                 : 8 9 9 9 9 10 10 10 11 11 12
+NOTE                 : 4 5
+NUMB                 : 8 10 10 10 10 11 11 11 12 12 13
 error                : 
 
 Nonterminals, with rules where they appear
 
-command              : 6
-instruction          : 3 5
+control              : 6
+instr                : 3 5
 list                 : 2
 system               : 2 0
 
@@ -41,10 +42,11 @@ state 0
     (1) system -> .
     (2) system -> . system list
 
-    COMMENT         reduce using rule 1 (system -> .)
-    DIRECTIVE       reduce using rule 1 (system -> .)
-    WORD            reduce using rule 1 (system -> .)
+    NOTE            reduce using rule 1 (system -> .)
+    DIRECT          reduce using rule 1 (system -> .)
+    NUMB            reduce using rule 1 (system -> .)
     $end            reduce using rule 1 (system -> .)
+    NEWLINE         reduce using rule 1 (system -> .)
 
     system                         shift and go to state 1
 
@@ -52,166 +54,179 @@ state 1
 
     (0) S' -> system .
     (2) system -> system . list
-    (3) list -> . instruction NEWLINE
-    (4) list -> . COMMENT NEWLINE
-    (5) list -> . instruction COMMENT NEWLINE
-    (6) instruction -> . command
-    (7) instruction -> . DIRECTIVE
-    (8) instruction -> . WORD COLON
-    (9) command -> . WORD WORD COMMA WORD COMMA WORD
-    (10) command -> . WORD WORD COMMA WORD
-    (11) command -> . WORD WORD
-    (12) command -> . WORD
+    (3) list -> . instr NEWLINE
+    (4) list -> . NOTE NEWLINE
+    (5) list -> . instr NOTE NEWLINE
+    (6) instr -> . control
+    (7) instr -> . DIRECT
+    (8) instr -> . NUMB COLON
+    (9) control -> .
+    (10) control -> . NUMB NUMB COMMA NUMB COMMA NUMB
+    (11) control -> . NUMB NUMB COMMA NUMB
+    (12) control -> . NUMB NUMB
+    (13) control -> . NUMB
 
-    COMMENT         shift and go to state 2
-    DIRECTIVE       shift and go to state 5
-    WORD            shift and go to state 4
+  ! shift/reduce conflict for NOTE resolved as shift
+    NOTE            shift and go to state 6
+    DIRECT          shift and go to state 5
+    NUMB            shift and go to state 7
+    NEWLINE         reduce using rule 9 (control -> .)
 
-    command                        shift and go to state 7
-    instruction                    shift and go to state 3
-    list                           shift and go to state 6
+  ! NOTE            [ reduce using rule 9 (control -> .) ]
+
+    control                        shift and go to state 2
+    list                           shift and go to state 4
+    instr                          shift and go to state 3
 
 state 2
 
-    (4) list -> COMMENT . NEWLINE
+    (6) instr -> control .
 
-    NEWLINE         shift and go to state 8
+    NEWLINE         reduce using rule 6 (instr -> control .)
+    NOTE            reduce using rule 6 (instr -> control .)
 
 
 state 3
 
-    (3) list -> instruction . NEWLINE
-    (5) list -> instruction . COMMENT NEWLINE
+    (3) list -> instr . NEWLINE
+    (5) list -> instr . NOTE NEWLINE
 
-    NEWLINE         shift and go to state 10
-    COMMENT         shift and go to state 9
+    NEWLINE         shift and go to state 9
+    NOTE            shift and go to state 8
 
 
 state 4
 
-    (8) instruction -> WORD . COLON
-    (9) command -> WORD . WORD COMMA WORD COMMA WORD
-    (10) command -> WORD . WORD COMMA WORD
-    (11) command -> WORD . WORD
-    (12) command -> WORD .
+    (2) system -> system list .
 
-    COLON           shift and go to state 11
-    WORD            shift and go to state 12
-    NEWLINE         reduce using rule 12 (command -> WORD .)
-    COMMENT         reduce using rule 12 (command -> WORD .)
+    NOTE            reduce using rule 2 (system -> system list .)
+    DIRECT          reduce using rule 2 (system -> system list .)
+    NUMB            reduce using rule 2 (system -> system list .)
+    $end            reduce using rule 2 (system -> system list .)
+    NEWLINE         reduce using rule 2 (system -> system list .)
 
 
 state 5
 
-    (7) instruction -> DIRECTIVE .
+    (7) instr -> DIRECT .
 
-    NEWLINE         reduce using rule 7 (instruction -> DIRECTIVE .)
-    COMMENT         reduce using rule 7 (instruction -> DIRECTIVE .)
+    NEWLINE         reduce using rule 7 (instr -> DIRECT .)
+    NOTE            reduce using rule 7 (instr -> DIRECT .)
 
 
 state 6
 
-    (2) system -> system list .
+    (4) list -> NOTE . NEWLINE
 
-    COMMENT         reduce using rule 2 (system -> system list .)
-    DIRECTIVE       reduce using rule 2 (system -> system list .)
-    WORD            reduce using rule 2 (system -> system list .)
-    $end            reduce using rule 2 (system -> system list .)
+    NEWLINE         shift and go to state 10
 
 
 state 7
 
-    (6) instruction -> command .
+    (8) instr -> NUMB . COLON
+    (10) control -> NUMB . NUMB COMMA NUMB COMMA NUMB
+    (11) control -> NUMB . NUMB COMMA NUMB
+    (12) control -> NUMB . NUMB
+    (13) control -> NUMB .
 
-    NEWLINE         reduce using rule 6 (instruction -> command .)
-    COMMENT         reduce using rule 6 (instruction -> command .)
+    COLON           shift and go to state 11
+    NUMB            shift and go to state 12
+    NEWLINE         reduce using rule 13 (control -> NUMB .)
+    NOTE            reduce using rule 13 (control -> NUMB .)
 
 
 state 8
 
-    (4) list -> COMMENT NEWLINE .
-
-    COMMENT         reduce using rule 4 (list -> COMMENT NEWLINE .)
-    DIRECTIVE       reduce using rule 4 (list -> COMMENT NEWLINE .)
-    WORD            reduce using rule 4 (list -> COMMENT NEWLINE .)
-    $end            reduce using rule 4 (list -> COMMENT NEWLINE .)
-
-
-state 9
-
-    (5) list -> instruction COMMENT . NEWLINE
+    (5) list -> instr NOTE . NEWLINE
 
     NEWLINE         shift and go to state 13
 
 
+state 9
+
+    (3) list -> instr NEWLINE .
+
+    NOTE            reduce using rule 3 (list -> instr NEWLINE .)
+    DIRECT          reduce using rule 3 (list -> instr NEWLINE .)
+    NUMB            reduce using rule 3 (list -> instr NEWLINE .)
+    $end            reduce using rule 3 (list -> instr NEWLINE .)
+    NEWLINE         reduce using rule 3 (list -> instr NEWLINE .)
+
+
 state 10
 
-    (3) list -> instruction NEWLINE .
+    (4) list -> NOTE NEWLINE .
 
-    COMMENT         reduce using rule 3 (list -> instruction NEWLINE .)
-    DIRECTIVE       reduce using rule 3 (list -> instruction NEWLINE .)
-    WORD            reduce using rule 3 (list -> instruction NEWLINE .)
-    $end            reduce using rule 3 (list -> instruction NEWLINE .)
+    NOTE            reduce using rule 4 (list -> NOTE NEWLINE .)
+    DIRECT          reduce using rule 4 (list -> NOTE NEWLINE .)
+    NUMB            reduce using rule 4 (list -> NOTE NEWLINE .)
+    $end            reduce using rule 4 (list -> NOTE NEWLINE .)
+    NEWLINE         reduce using rule 4 (list -> NOTE NEWLINE .)
 
 
 state 11
 
-    (8) instruction -> WORD COLON .
+    (8) instr -> NUMB COLON .
 
-    NEWLINE         reduce using rule 8 (instruction -> WORD COLON .)
-    COMMENT         reduce using rule 8 (instruction -> WORD COLON .)
+    NEWLINE         reduce using rule 8 (instr -> NUMB COLON .)
+    NOTE            reduce using rule 8 (instr -> NUMB COLON .)
 
 
 state 12
 
-    (9) command -> WORD WORD . COMMA WORD COMMA WORD
-    (10) command -> WORD WORD . COMMA WORD
-    (11) command -> WORD WORD .
+    (10) control -> NUMB NUMB . COMMA NUMB COMMA NUMB
+    (11) control -> NUMB NUMB . COMMA NUMB
+    (12) control -> NUMB NUMB .
 
     COMMA           shift and go to state 14
-    NEWLINE         reduce using rule 11 (command -> WORD WORD .)
-    COMMENT         reduce using rule 11 (command -> WORD WORD .)
+    NEWLINE         reduce using rule 12 (control -> NUMB NUMB .)
+    NOTE            reduce using rule 12 (control -> NUMB NUMB .)
 
 
 state 13
 
-    (5) list -> instruction COMMENT NEWLINE .
+    (5) list -> instr NOTE NEWLINE .
 
-    COMMENT         reduce using rule 5 (list -> instruction COMMENT NEWLINE .)
-    DIRECTIVE       reduce using rule 5 (list -> instruction COMMENT NEWLINE .)
-    WORD            reduce using rule 5 (list -> instruction COMMENT NEWLINE .)
-    $end            reduce using rule 5 (list -> instruction COMMENT NEWLINE .)
+    NOTE            reduce using rule 5 (list -> instr NOTE NEWLINE .)
+    DIRECT          reduce using rule 5 (list -> instr NOTE NEWLINE .)
+    NUMB            reduce using rule 5 (list -> instr NOTE NEWLINE .)
+    $end            reduce using rule 5 (list -> instr NOTE NEWLINE .)
+    NEWLINE         reduce using rule 5 (list -> instr NOTE NEWLINE .)
 
 
 state 14
 
-    (9) command -> WORD WORD COMMA . WORD COMMA WORD
-    (10) command -> WORD WORD COMMA . WORD
+    (10) control -> NUMB NUMB COMMA . NUMB COMMA NUMB
+    (11) control -> NUMB NUMB COMMA . NUMB
 
-    WORD            shift and go to state 15
+    NUMB            shift and go to state 15
 
 
 state 15
 
-    (9) command -> WORD WORD COMMA WORD . COMMA WORD
-    (10) command -> WORD WORD COMMA WORD .
+    (10) control -> NUMB NUMB COMMA NUMB . COMMA NUMB
+    (11) control -> NUMB NUMB COMMA NUMB .
 
     COMMA           shift and go to state 16
-    NEWLINE         reduce using rule 10 (command -> WORD WORD COMMA WORD .)
-    COMMENT         reduce using rule 10 (command -> WORD WORD COMMA WORD .)
+    NEWLINE         reduce using rule 11 (control -> NUMB NUMB COMMA NUMB .)
+    NOTE            reduce using rule 11 (control -> NUMB NUMB COMMA NUMB .)
 
 
 state 16
 
-    (9) command -> WORD WORD COMMA WORD COMMA . WORD
+    (10) control -> NUMB NUMB COMMA NUMB COMMA . NUMB
 
-    WORD            shift and go to state 17
+    NUMB            shift and go to state 17
 
 
 state 17
 
-    (9) command -> WORD WORD COMMA WORD COMMA WORD .
+    (10) control -> NUMB NUMB COMMA NUMB COMMA NUMB .
 
-    NEWLINE         reduce using rule 9 (command -> WORD WORD COMMA WORD COMMA WORD .)
-    COMMENT         reduce using rule 9 (command -> WORD WORD COMMA WORD COMMA WORD .)
+    NEWLINE         reduce using rule 10 (control -> NUMB NUMB COMMA NUMB COMMA NUMB .)
+    NOTE            reduce using rule 10 (control -> NUMB NUMB COMMA NUMB COMMA NUMB .)
 
+WARNING: 
+WARNING: Conflicts:
+WARNING: 
+WARNING: shift/reduce conflict for NOTE in state 1 resolved as shift
