@@ -50,7 +50,10 @@ def beq_bne(expressions):
         if len(ex) == 2:
           j, i = ex
           if j.checkControl('j') and i.checkLabel(e[2]):
-            e.name = 'bne' if e.checkControl('beq') else 'beq'
+            if e.checkControl('beq'):
+              e.name = 'bne'
+            else:
+              e.name = 'beq'
             e[2] = j[0]
             expressions.substitute(3, [e, i])
 
