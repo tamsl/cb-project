@@ -1,7 +1,7 @@
 #!/usr/bin/python
 from code.parse_yacc import parse_file
 from code.optimize import optimize
-from code.writer import write_statements
+from code.peep import createAssemblyCode
 
 if __name__ == '__main__':
     from sys import argv, exit
