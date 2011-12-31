@@ -1,36 +1,45 @@
 from peep import Block
 
+# Accumulating defined registers of a block in blocks
 def definitions(bs):
   def_bs = {}
   for block in bs: 
     for ex in block:
-      for def_register in ex.is_def(): 
+      for def_register in ex.is_def():
+        # If defined register in collection
+        # add expression ID, else set of
+        # expression ID is added
         if def_register in def_bs:
-          defs_bs[def_register].add(ex.sid)
+          defs_bs[def_register].add(ex.eID)
         else:
-          id_set = set([ex.sid])
+          id_set = set([ex.eID])
           defs_bs[def_register] = id_set
   return defs
 
+# Choosing head expressions considering a jump target
 def head(expressions):
   heads = [0]
   tar = []
   for x, expr in enumerate(expressions[1:]):
     next = (x + 1)
+    # Jump appended
     if expr.checkLabel() and next not in heads \
       and expr.name in tar:
       heads.append(next)
+    # Target saved of expression
     if expr.checkJump():
       heads.append(x + 2)
       tar.append(expr[-1])
   heads.sort()
   return heads
 
+# Finding basic blocks 
 def bbs_find(expressions):
   heads = head(expressions)
   len_expr = len(head(expressions)) - 1
   bs_hd = expressions[heads[-1]:]
   bs = []
+  # By means of a list of expressions
   for x in range(len_expr):
     bs_expr = expressions[heads[x]:heads[x + 1]]
     bs.append(bb(bs_expr))
@@ -38,6 +47,7 @@ def bbs_find(expressions):
   bs.append(bb(bs_hd))
   return bs
 
+# Class of basic blocks
 class bb(Block):
   def __init__(self, expressions=[]):
     Block.__init__(self, expressions)
@@ -48,6 +58,7 @@ class bb(Block):
     self.setKill = set([])
     self.setGen = set([])
 
+  # The handling block
   def forcing(self, block):
     for1 = self.force
     for2 = self.forced
@@ -55,6 +66,7 @@ class bb(Block):
       for1.append(b)
       for2.append(b)
 
+  # Creating edges
   def edges(self, block):
     edge_i = self.edges1
     edge_o = self.edges2
@@ -62,18 +74,21 @@ class bb(Block):
       edge_o.append(b)
       edge_i.append(b)
 
+  # Producing kill and gen respectively
   def sets(self, definitions):
     handled_set = set()
     self.setKill = set()
     self.setGen = set()
     rev = reversed(self)
     defs = {}
+    # Kill
     for id_expr, def_register in defs.iteritems():
       if def_register not in defs:
         c = id_expr
       else:
         c = id_expr - set([defs[def_register]])
       self.setKill |= c
+    # Gen
     for ex in rev:
       for def_register in ex.checkDefinition():
         if def_register not in defs:

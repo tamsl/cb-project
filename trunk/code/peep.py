@@ -2,9 +2,9 @@ import re
 
 # Write the created assembly code in the file.
 def writeAssemblyCodeInFile(fileName, expressions):
-  theFile = open(fileName, 'w+')
-  theFile.write(createAssemblyCode(expressions))
-  theFile.close()
+  file_func = open(fileName, 'w+')
+  file_func.write(createAssemblyCode(expressions))
+  file_func.close()
 
 # Create assembly code using a list of expressions. 
 def createAssemblyCode(expressions):
@@ -18,9 +18,9 @@ def createAssemblyCode(expressions):
     else:
       newLine = '\n'
 
-    if ex.is_directive() == True or ex.is_command() == True:
+    if ex.checkDirective() == True or ex.checkControl() == True:
       line = '\t' + ex.name
-      if ex.is_command() == True:
+      if ex.checkControl() == True:
         if len(ex):
           if len(ex.name) >= 8:
             line = line + ' '
@@ -28,13 +28,13 @@ def createAssemblyCode(expressions):
             line = line + '\t' 
 
           line = line + ','.join(ex.args)
-    elif ex.is_note() == True:
+    elif ex.checkNote() == True:
       line = '#' + ex.name
-      if ex.is_inline_note() == False:
+      if ex.checkNoteInline() == False:
         line = ('\t' * spacing) + line
       else:
         newLine = '\t' * (1 + int(ceil((24 - len(previous.expandtabs(4))) / 4.)))
-    elif ex.is_label() == True:
+    elif ex.checkLabel() == True:
       line = ex.name + ':'
       spacing = 1
     else:
@@ -45,6 +45,7 @@ def createAssemblyCode(expressions):
 
   return (assemblyCode + '\n')
 
+# Class of Block
 class Block:
   def __init__(self, expressions=[]):
     self.expressions = expressions
@@ -84,15 +85,17 @@ class Block:
     else:
       return self.expressions[self.position]
 
-    # Reset position and reverse the list of expressions.
+  # Reset position and reverse the list of expressions.
   def resetAndReverse(self):
     self.position = 0
     self.expressions.reverse()
-
+  
+  # Adding expression
   def putIn(self, expression, i = None):
     i = i if i != None else self.position
     self.expressions.insert(i, expression)
 
+  # Filter expressions
   def cleanUp(self, cb):
     expres = self.expressions
     self.expressions = filter(cb, expres)
@@ -108,9 +111,9 @@ class Block:
     self.position = len(sub) + begin
     self.expressions = self.expressions[:begin] + sub + self.expressions[begin + c:]
 
+# Class of Expression
 class Expression:
   eID = 1
-
   def __init__(self, typeExpression, name, *args, **otherArgs):
     self.typeE = typeExpression
     self.name = name
@@ -125,6 +128,7 @@ class Expression:
   def __setitem__(self, key, v):
     self.args[key] = v
 
+  # Controlling equal expressions
   def __eq__(self, express):
     if express.name == self.name and express.typeE == self.typeE \
        and express.args == self.args:
@@ -143,24 +147,28 @@ class Expression:
   def __repr__(self):
     return str(self)
 
+ # Checking Note expression
   def checkNote(self):
     if self.typeE != 'note':
       return False
     else:
       return True
 
+  # Checking Note Inline expression
   def checkNoteInline(self):
     if self.otherArgs['inline'] and self.typeE == 'note':
       return True
     else:
       return False
 
+  # Checking Directive expression
   def checkDirective(self):
     if self.typeE != 'direct':
       return False
     else:
       return True
 
+  # Checking Label expression
   def checkLabel(self, name = None):
     if name != None:
       if self.typeE == 'label' and self.name == name:
@@ -173,12 +181,14 @@ class Expression:
       else:
         return True  
 
+  # Checking Control expression
   def checkControl(self, *args):
     if (self.name in args or not len(args)) and self.typeE == 'control':
       return True
     else:
       return False
 
+  # Checking Branch expression
   def checkBranch(self):
     if re.match('bne|beq|bgtz|bltz|bct|bgez|bcf|blez$', self.name) \
        and self.checkControl() == True:
@@ -186,6 +196,7 @@ class Expression:
     else:
       return False
 
+  # Checking Jump expression
   def checkJump(self):
     if re.match('^bne|beq|jal|j|bgtz|bltz|bct|bgez|bcf|blez$', self.name) \
       and self.checkControl() == True:
@@ -193,18 +204,21 @@ class Expression:
     else:
       return False
 
+  # Checking Target Jump expression
   def getTargetJump(self):
     if self.checkJump() == True:
       return self[-1]
     else:
       raise Exception('Command "%s" does not contain a target jump' % self.name)
 
+  # Checking Shift expression
   def checkShift(self):
     if (re.match('^s(rl|ra|ll)$', self.name) and self.checkControl()) == True:
       return True
     else:
       return False
 
+  # Checking Shift 'less then' expression
   def checkShift2(self):
     cmds = ['sltu', 'slt']
     for i in range(0, len(cmds)):
@@ -212,6 +226,7 @@ class Expression:
         return True
     return False
 
+  # Checking Load argument expression
   def checkLoad(self):
     cmds = ['dlw', 'l.s', 'l.d', 'li', 'lw'] 
     for i in range(0, len(cmds)):
@@ -219,6 +234,7 @@ class Expression:
         return True
     return False  
 
+  # Checking Load expression
   def checkLoad2(self):
     if re.match('^l(bu|a|w||\.s|b|\.d)|dlw$', self.name) \
        and self.checkControl() == True:
@@ -226,6 +242,7 @@ class Expression:
     else:
       return False  
 
+  # Checking Arithmetic expression
   def checkArithmetic(self):
     if re.match('^s(rl|ra|ll)|(and|neg|mflo|mfhi|abs|[xn]?or)|(slt|add|sub)u?'
                 + '|sqrt|neg|div|abs|mult|c|add|sub)\.[sd]$', self.name) \
@@ -234,6 +251,7 @@ class Expression:
     else:
       return False
 
+  # Checking Arithmetic controller expression
   def checkArithmeticD(self):
     if re.match('^(div|add|mul|sub)\.d$', self.name) \
        and self.checkControl() == True:
@@ -241,19 +259,7 @@ class Expression:
     else:
       return False
 
-  def checkMonop(self):
-    if not (self.checkArithmetic() == True and len(self) == 2):
-      return False
-    else:
-      return True
-
-  def checkBinop(self):
-    if len(self) == 3 and self.checkJump() == False \
-       and self.checkControl() == True:
-      return True
-    else:
-      return False
-
+  # Checking Move expression
   def checkMove(self):
     cmds = ['mthi', 'mflo'] 
     for i in range(0, len(cmds)):
@@ -261,38 +267,60 @@ class Expression:
         return True
     return False
 
-  def checkTruncate(self):
-    if re.match('^trunc\.[a-z\.]*$', self.name) and self.checkControl() == True:
-      return True
-    else:
+  # Checking Unary expression
+  def checkMonop(self):
+    if not (self.checkArithmetic() == True and len(self) == 2):
       return False
-
-  def checkConvert(self):
-    if re.match('^cvt\.[a-z\.]*$', self.name) and self.checkControl() == True:
-      return True
     else:
-      return False
-
-  def checkLogical(self):
-    if re.match('^(and|xor|or)i?$', self.name) and self.checkControl() == True:
       return True
-    else:
-      return False
 
+  # Checking Unary controller expression
   def checkUnaryD(self):
     if re.match('^(neg|abs|mov)\.d$', self.name) and self.checkControl() == True:
       return True
     else:
       return False
 
+  # Checking Binary expression
+  def checkBinop(self):
+    if len(self) == 3 and self.checkJump() == False \
+       and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  # Checking Truncate expression
+  def checkTruncate(self):
+    if re.match('^trunc\.[a-z\.]*$', self.name) and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  # Checking Convert expression
+  def checkConvert(self):
+    if re.match('^cvt\.[a-z\.]*$', self.name) and self.checkControl() == True:
+      return True
+    else:
+      return False
+ 
+  # Checking Logic expression
+  def checkLogical(self):
+    if re.match('^(and|xor|or)i?$', self.name) and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  # Checking definition of register using retrieve()
   def checkDefinition(self, register):
     definition = self.retrieve()
     return register in definition
 
+  # Checking usage of register using retrieveUsage()
   def checkUsage(self, register):
     usage = self.retrieveUsage()
     return register in usage
-
+  
+  # Retrieve expression variables
   def retrieve(self):
     if self.checkLoad() == True or self.checkLogical() == True \
        or self.checkArithmetic() == True or self.checkArithmeticD() == True \
@@ -305,6 +333,7 @@ class Expression:
     else:
       return []
 
+  # Usage of retrieved expression variables 
   def retrieveUsage(self):
     retrieved = []
     
@@ -319,6 +348,5 @@ class Expression:
             retrieved.append(self[0])
     elif self.checkBinop():
       retrieved = retrieved + self[1:]
-
     return retrieved
 
