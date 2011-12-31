@@ -4,7 +4,6 @@ from block_optimize import bbs_find
 import re
 
 def remove(opt, expressions):
-
   if opt.is_command('opt'):
     if opt[0] == opt[1]:
       expressions.replace(1, [])
@@ -51,7 +50,7 @@ def beq_bne(expressions):
             e[2] = j[0]
             expressions.replace(3, [e, i])
 
-0def optimize_ld(opt, expressions):
+def optimize_ld(opt, expressions):
   if opt.is_command('sw'):
     load = expressions.peek()
     if load.is_command('lw') and load.args == opt.args:

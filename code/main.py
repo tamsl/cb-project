@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from parse_yacc import parse
+from parse_yacc import parse_file
 from optimize import optimizer
 from peep import createAssemblyCode
 import sys
