@@ -1,5 +1,50 @@
 import re
 
+# Write the created assembly code in the file.
+def writeAssemblyCodeInFile(fileName, expressions):
+  theFile = open(fileName, 'w+')
+  theFile.write(createAssemblyCode(expressions))
+  theFile.close()
+
+# Create assembly code using a list of expressions. 
+def createAssemblyCode(expressions):
+  assemblyCode = ''
+  previous = ''
+  spacing = 0
+
+  for i, ex in enumerate(expressions):
+    if not i:
+      newLine = ''
+    else:
+      newLine = '\n'
+
+    if ex.is_directive() == True or ex.is_command() == True:
+      line = '\t' + ex.name
+      if ex.is_command() == True:
+        if len(ex):
+          if len(ex.name) >= 8:
+            line = line + ' '
+          else:
+            line = line + '\t' 
+
+          line = line + ','.join(ex.args)
+    elif ex.is_comment() == True:
+      line = '#' + ex.name
+      if ex.is_inline_comment() == False:
+        line = ('\t' * spacing) + line
+      else:
+        newLine = '\t' * (1 + int(ceil((24 - len(previous.expandtabs(4))) / 4.)))
+    elif ex.is_label() == True:
+      line = ex.name + ':'
+      spacing = 1
+    else:
+      raise Exception
+
+    assemblyCode = assemblyCode + (newLine + line)
+    previous = line
+
+  return (assemblyCode + '\n')
+
 class Statement:
     sid = 1
 
