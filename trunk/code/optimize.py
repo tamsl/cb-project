@@ -1,54 +1,50 @@
 import re
 from block_optimize import bbs_find
 
-def moves(opt, expressions, t):
+def remove(opt, expressions):
   # Original sequence | Replacement
   # mov $regA, $regB  | --- (remove)
   # (with $regA == $regB)
-  if t == 'remove':
-    if opt.checkCommand('opt'):
-      if opt[0] == opt[1]:
-        expressions.substitute(1, [])
-        return 1
+  if opt.checkCommand('opt'):
+    if opt[0] == opt[1]:
+      expressions.substitute(1, [])
+      return 1
 
   # Original sequence       | Replacement
   # mov $regA, $regB        | instr $regA, $regB,...
   # instr $regA, $regA, ... |
-  elif t == 'replace':
-    if opt.checkCommand('opt'):
-      ex = expressions.readExpressionOffset()
-      if ex and ((ex[0] and ex[1]) == opt[0]) and len(ex) > 1:
-        ex[1] = opt[1]
-        expressions.substitute(2, [ex])
-        return 1
+def replace(opt, expressions):
+  if opt.checkCommand('opt'):
+    ex = expressions.readExpressionOffset()
+    if ex and ((ex[0] and ex[1]) == opt[0]) and len(ex) > 1:
+      ex[1] = opt[1]
+      expressions.substitute(2, [ex])
+      return 1
 
   # Original sequence | Replacement
   # instr $regA, ...  | instr $4, ...
   # mov $4, $regA     | jal XX
   # jal XX            |
-  elif t == 'jal':
-    if opt.checkCommand() and len(opt) > 0:
-      ex = expressions.readExpressionOffset(2)
-      if len(ex) > 1:
-        instr, jal = ex
-        if opt[0] == instr[1] and instr.checkCommand('move'):
-          if re.match('^\$[4-7]$', instr[0]) and jal.checkCommand('jal'):
-            opt[0] = instr[0]
-            expressions.substitute(2, [opt])
-            return 1
+def jal(opt, expressions):
+  if opt.checkCommand() and len(opt) > 0:
+    ex = expressions.readExpressionOffset(2)
+    if len(ex) > 1:
+      instr, jal = ex
+      if opt[0] == instr[1] and instr.checkCommand('move'):
+        if re.match('^\$[4-7]$', instr[0]) and jal.checkCommand('jal'):
+          opt[0] = instr[0]
+          expressions.substitute(2, [opt])
+          return 1
 
   # Original sequence | Replacement
   # mov $regA, $regB  | move $regA, $regB
   # mov $regB, $regA  |
-  elif t == 'move':
-    if opt.checkCommand('move'):
-      mov = expressions.readExpressionOffset()
-      if mov.checkCommand('move') and opt[1] == mov[0] and opt[0] == mov[1] :
-        expressions.substitute(2, [opt])
-        return 1
-
-  else:
-    return 0
+def move(opt, expressions):
+  if opt.checkCommand('move'):
+    mov = expressions.readExpressionOffset()
+    if mov.checkCommand('move') and opt[1] == mov[0] and opt[0] == mov[1] :
+      expressions.substitute(2, [opt])
+      return 1
 
 # Original sequence  | Replacement
 #   beq/bne ..., $Lx |   bne/beq ..., $Ly
@@ -102,17 +98,29 @@ def zero_shift(opt, expressions):
     return 1
 
 def getRidOfRedundancy(block):
-  prev = -10
+  prev = -1
   switch = False
-  funcs = [optimze_ld, zero_shift, optimize_lw]
+  funcs = [remove, replace, jal, move, optimize_ld, zero_shift, optimize_lw]
+
+  while prev != len(block):
+    prev = len(block)
+    while not block.checkPosition():
+      ex = block.read()
+      for func in funcs:
+        if func(ex, block):
+          switch = True
+          break
+
+    return switch
+  """
   cmds = ['remove', 'replace', 'jal', 'move']
 
   while len(block) != prev:
     prev = len(block)
-    while block.checkPosition() == False:
+    while not block.checkPosition():
       ex = block.read()
       for cmd in cmds:
-        if moves(ex, block, cmd) == True:
+        if moves(ex, block, cmd):
           switch = True
           break
       for func in funcs:
@@ -121,6 +129,11 @@ def getRidOfRedundancy(block):
           break
 
   return switch
+  """
+def optimize_block(block):
+    """Optimize a basic block."""
+    while getRidOfRedundancy(block):
+        pass
 
 def optimizer(expressions, verbose=0):
   lengths = []
@@ -129,6 +142,7 @@ def optimizer(expressions, verbose=0):
   lengths.append(len(expressions))
 
   blocks = bbs_find(expressions)
+  map(optimize_block, blocks)
   blockExpressions = map(lambda blck: blck.expressions, blocks)
   optimizedBlocks = reduce(lambda x, y: x + y, blockExpressions)
   lengths.append(len(optimizedBlocks))
