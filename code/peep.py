@@ -102,8 +102,8 @@ class Statement:
     
     def is_double_aritmethic(self):
         """Check if the statement is a arithmetic .d operator."""
-        return self.is_command() and \
-                re.match('^(add|sub|div|mul)\.d$', self.name)
+        return self.is_command() \
+                and re.match('^(add|sub|div|mul)\.d$', self.name)
                 
     def is_double_unary(self):
         """Check if the statement is a unary .d operator."""
@@ -179,23 +179,23 @@ class Statement:
 
 
 class Block:
-    def __init__(self, statements=[]):
-        self.statements = statements
+    def __init__(self, expressions=[]):
+        self.expressions = expressions
         self.pointer = 0
 
     def __iter__(self):
-        return iter(self.statements)
+        return iter(self.expressions)
 
     def __getitem__(self, n):
-        return self.statements[n]
+        return self.expressions[n]
 
     def __len__(self):
-        return len(self.statements)
+        return len(self.expressions)
 
     def read(self, count=1):
         """Read the statement at the current pointer position and move the
         pointer one position to the right."""
-        s = self.statements[self.pointer]
+        s = self.expressions[self.pointer]
         self.pointer += 1
 
         return s
@@ -210,8 +210,8 @@ class Block:
         if self.end():
             return Statement('empty', '') if count == 1 else []
 
-        return self.statements[self.pointer] if count == 1 \
-               else self.statements[self.pointer:self.pointer + count]
+        return self.expressions[self.pointer] if count == 1 \
+               else self.expressions[self.pointer:self.pointer + count]
 
     def replace(self, count, replacement, start=None):
         """Replace the given range start-(start + count) with the given
@@ -223,23 +223,23 @@ class Block:
         if start == None:
             start = self.pointer - 1
 
-        before = self.statements[:start]
-        after = self.statements[start + count:]
-        self.statements = before + replacement + after
+        before = self.expressions[:start]
+        after = self.expressions[start + count:]
+        self.expressions = before + replacement + after
         self.pointer = start + len(replacement)
 
     def insert(self, statement, index=None):
         if index == None:
             index = self.pointer
 
-        self.statements.insert(index, statement)
+        self.expressions.insert(index, statement)
 
     def apply_filter(self, callback):
         """Apply a filter to the statement list. If the callback returns True,
         the statement will remain in the list.."""
-        self.statements = filter(callback, self.statements)
+        self.expressions = filter(callback, self.expressions)
 
     def reverse_statements(self):
         """Reverse the statement list and reset the pointer."""
-        self.statements = self.statements[::-1]
+        self.expressions = self.expressions[::-1]
         self.pointer = 0
