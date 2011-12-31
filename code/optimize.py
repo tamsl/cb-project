@@ -1,21 +1,15 @@
 from math import log
 import re
 from block_optimize import bbs_find
-
 import re
 
 def remove(opt, expressions):
-  # Original sequence | Replacement
-  # mov $regA, $regB  | --- (remove)
-  # (with $regA == $regB)
+
   if opt.is_command('opt'):
     if opt[0] == opt[1]:
       expressions.replace(1, [])
       return True
 
-  # Original sequence       | Replacement
-  # mov $regA, $regB        | instr $regA, $regB,...
-  # instr $regA, $regA, ... |
 def replace(opt, expressions):
   if opt.is_command('opt'):
     ex = expressions.peek()
@@ -24,10 +18,6 @@ def replace(opt, expressions):
       expressions.replace(2, [ex])
       return True
 
-  # Original sequence | Replacement
-  # instr $regA, ...  | instr $4, ...
-  # mov $4, $regA     | jal XX
-  # jal XX            |
 def jal(opt, expressions):
   if opt.is_command() and len(opt) > 0:
     ex = expressions.peek(2)
@@ -39,9 +29,6 @@ def jal(opt, expressions):
           expressions.replace(2, [opt])
           return True
 
-  # Original sequence | Replacement
-  # mov $regA, $regB  | move $regA, $regB
-  # mov $regB, $regA  |
 def move(opt, expressions):
   if opt.is_command('move'):
     mov = expressions.peek()
@@ -49,10 +36,6 @@ def move(opt, expressions):
       expressions.replace(2, [opt])
       return True
 
-# Original sequence  | Replacement
-#   beq/bne ..., $Lx |   bne/beq ..., $Ly
-#   j $Ly            | $Lx:
-# $Lx:
 def beq_bne(expressions):
   prev = -1
   while prev != len(expressions):
@@ -68,19 +51,13 @@ def beq_bne(expressions):
             e[2] = j[0]
             expressions.replace(3, [e, i])
 
-# Original sequence | Replacement
-# sw $regA, XX      |  sw $regA, XX
-# ld $regA, XX
-def optimize_ld(opt, expressions):
+0def optimize_ld(opt, expressions):
   if opt.is_command('sw'):
     load = expressions.peek()
     if load.is_command('lw') and load.args == opt.args:
       expressions.replace(2, [opt])
       return True
 
-# Original sequence    | Replacement
-# add $regA, $regA, X  | lw ..., X($regA)
-# lw ..., 0($regA)
 def optimize_lw(opt, expressions):
   if opt.is_command('addu') and opt[0] == opt[1] and isinstance(opt[2], int):
     ex = expressions.peek()
@@ -89,9 +66,6 @@ def optimize_lw(opt, expressions):
       expressions.replace(2, [ex])
       return True
 
-# Original sequence     | Replacement
-# shift $regA, $regA, 0 |  --- (remove)
-# (shift = sll, sla, srl, sra)
 def zero_shift(opt, expressions):
   if opt.is_shift() and opt[0] == opt[1] and opt[2] == 0:
     expressions.replace(1, [])
@@ -112,24 +86,7 @@ def getRidOfRedundancy(block):
           break
 
     return switch
-  """
-  cmds = ['remove', 'replace', 'jal', 'move']
 
-  while len(block) != prev:
-    prev = len(block)
-    while not block.checkPosition():
-      ex = block.read()
-      for cmd in cmds:
-        if moves(ex, block, cmd):
-          switch = True
-          break
-      for func in funcs:
-        if func(ex, block):
-          switch = True
-          break
-
-  return switch
-  """
 def optimize_block(block):
   """Optimize a basic block."""
   while getRidOfRedundancy(block):
