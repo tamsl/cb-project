@@ -1,5 +1,5 @@
 #!/usr/bin/python
-from parse_yacc import parse_file
+from parse_yacc import parse
 from optimize import optimize
 from peep import createAssemblyCode
 import sys
@@ -7,12 +7,12 @@ import sys
 if __name__ == '__main__':
   try:
     if len(sys.argv) < 2:
-      print 'Usage: python %s FILE' % sys.argv[0]
+      print 'Run: python %s assembly.s' % sys.argv[0]
   except:
     sys.exit(1)    
   # Parsing and optimization
-  original = parse_file(sys.argv[1])
-  optimized = optimize(original, verbose=1)
+  parsed = parse(sys.argv[1])
+  new = optimize(parsed, verbose=1)
   try:
     if len(sys.argv) > 2:
       file_func = open(sys.argv[2], 'w+')
@@ -20,6 +20,6 @@ if __name__ == '__main__':
     file_func.close()
     sys.exit(1)
 
-    file_func.write(createAssemblyCode(optimized))
+    file_func.write(createAssemblyCode(new))
     file_func.close()
 

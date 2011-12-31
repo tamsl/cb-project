@@ -156,7 +156,7 @@ class Expression:
       return False
 
   def checkDirective(self):
-    if self.typeE != 'directive':
+    if self.typeE != 'direct':
       return False
     else:
       return True
@@ -174,7 +174,7 @@ class Expression:
         return True  
 
   def checkControl(self, *args):
-    if (self.name in args or not len(args)) and self.typeE == 'command':
+    if (self.name in args or not len(args)) and self.typeE == 'control':
       return True
     else:
       return False

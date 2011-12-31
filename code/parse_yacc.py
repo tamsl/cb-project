@@ -2,69 +2,80 @@ import ply.yacc as yacc
 from parse_lex import tokens
 from peep import Expression as S, Block
 
-
-# Global statements administration
+# List with expressions
 expressions = []
-
 
 # Parsing rules
 begin = 'system'
 
 def p_input(p):
-    '''system :
-             | system list'''
-    pass
+  '''
+  system :
+         | system list
+  '''
+  pass
 
-def p_line_instruction(p):
-    'list : instruction NEWLINE'
-    pass
+def p_list_instr(p):
+  '''
+  list : instr NEWLINE
+  '''
+  pass
 
-def p_comment(p):
-    'list : COMMENT NEWLINE'
-    expressions.append(S('comment', p[1], inline=False))
+def p_note(p):
+  '''
+  list : NOTE NEWLINE
+  '''
+  expressions.append(S('note', p[1], inline=False))
 
-def p_comment_newline(p):
-    'list : instruction COMMENT NEWLINE'
-    expressions.append(S('comment', p[2], inline=True))
+def p_note_newline(p):
+  '''
+  list : instr NOTE NEWLINE
+  '''
+  expressions.append(S('note', p[2], inline=True))
 
-def p_instruction(p):
-    'instruction : command'
-    pass
+def p_inst_command(p):
+  '''
+  instr : control
+  '''
+  pass
 
-def p_directive(p):
-    'instruction : DIRECTIVE'
-    expressions.append(S('directive', p[1]))
+def p_direct(p):
+  '''
+  instr : DIRECT
+  '''
+  expressions.append(S('direct', p[1]))
 
-def p_word_colon(p):
-    'instruction : WORD COLON'
-    expressions.append(S('label', p[1]))
+def p_numb_colon(p):
+  '''
+  instr : NUMB COLON
+  '''
+  expressions.append(S('label', p[1]))
 
-def p_command(p):
-    '''command : WORD WORD COMMA WORD COMMA WORD
-               | WORD WORD COMMA WORD
-               | WORD WORD
-               | WORD'''
-    expressions.append(S('command', p[1], *list(p)[2::2]))
+def p_control(p):
+  '''
+  control : 
+          | NUMB NUMB COMMA NUMB COMMA NUMB
+          | NUMB NUMB COMMA NUMB
+          | NUMB NUMB
+          | NUMB
+  '''
+  expressions.append(S('control', p[1], *list(p)[2::2]))
 
 def p_error(p):
-    print 'Syntax error at "%s" on line %d' % (p.value, lexer.lineno)
+  print 'Error in the parser.'
 
-
-# Build YACC
+# Build the parser
 yacc.yacc()
 
+# Open an assembly file and parse it
+def parse(p):
+  global expressions
+  expressions = []
 
-def parse_file(p):
-    """Parse a given Assembly file, return a Block with Statement objects
-    containing the parsed instructions."""
-    global expressions
+  try:
+    to_parse = open(p).read()
+    yacc.parse(to_parse)
+  except IOError:
+    raise Exception('File "%s" could not be opened' % p)
 
-    expressions = []
-
-    try:
-        content = open(p).read()
-        yacc.parse(content)
-    except IOError:
-        raise Exception('File "%s" could not be opened' % p)
-
-    return Block(expressions)
+  return Block(expressions)
