@@ -17,10 +17,10 @@ def head(expressions):
     tar = []
     for x, expr in enumerate(expressions[1:]):
         next = (x + 1)
-        if expr.is_label() and next not in heads \
+        if expr.checkLabel() and next not in heads \
                 and expr.name in tar:
             heads.append(next)
-        if expr.is_jump():
+        if expr.checkJump():
             heads.append(x + 2)
             tar.append(expr[-1])
     heads.sort()

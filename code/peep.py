@@ -28,9 +28,9 @@ def createAssemblyCode(expressions):
             line = line + '\t' 
 
           line = line + ','.join(ex.args)
-    elif ex.is_comment() == True:
+    elif ex.is_note() == True:
       line = '#' + ex.name
-      if ex.is_inline_comment() == False:
+      if ex.is_inline_note() == False:
         line = ('\t' * spacing) + line
       else:
         newLine = '\t' * (1 + int(ceil((24 - len(previous.expandtabs(4))) / 4.)))
@@ -45,246 +45,280 @@ def createAssemblyCode(expressions):
 
   return (assemblyCode + '\n')
 
-class Statement:
-    sid = 1
-
-    def __init__(self, stype, name, *args, **kwargs):
-        self.stype = stype
-        self.name = name
-        self.args = list(args)
-        self.options = kwargs
-
-        # Assign a unique ID to each satement
-        self.sid = Statement.sid
-        Statement.sid += 1
-
-    def __getitem__(self, n):
-        """Get an argument."""
-        return self.args[n]
-
-    def __setitem__(self, n, value):
-        """Set an argument."""
-        self.args[n] = value
-
-    def __eq__(self, other):
-        """Check if two statements are equal by comparing their type, name and
-        arguments."""
-        return self.stype == other.stype and self.name == other.name \
-               and self.args == other.args
-
-    def __len__(self):
-        return len(self.args)
-
-    def __str__(self):  # pragma: nocover
-        return '<Statement sid=%d type=%s name=%s args=%s>' \
-                % (self.sid, self.stype, self.name, self.args)
-
-    def __repr__(self):  # pragma: nocover
-        return str(self)
-
-    def is_comment(self):
-        return self.stype == 'comment'
-
-    def is_inline_comment(self):
-        return self.is_comment() and self.options['inline']
-
-    def is_directive(self):
-        return self.stype == 'directive'
-
-    def is_label(self, name=None):
-        return self.stype == 'label' if name == None \
-               else self.stype == 'label' and self.name == name
-
-    def is_command(self, *args):
-        return self.stype == 'command' and (not len(args) or self.name in args)
-
-    def is_jump(self):
-        """Check if the statement is a jump."""
-        return self.is_command() \
-               and re.match('^j|jal|beq|bne|blez|bgtz|bltz|bgez|bct|bcf$', \
-                            self.name)
-
-    def is_branch(self):
-        """Check if the statement is a branch."""
-        return self.is_command() \
-               and re.match('^beq|bne|blez|bgtz|bltz|bgez|bct|bcf$', \
-                            self.name)
-
-    def is_shift(self):
-        """Check if the statement is a shift operation."""
-        return self.is_command() and re.match('^s(ll|rl|ra)$', self.name)
-
-    def is_load(self):
-        """Check if the statement is a load instruction."""
-        return self.is_command() and self.name in ['lw', 'li', 'dlw', 'l.s', \
-                                                   'l.d']
-                                                   
-    def is_arith(self):
-        """Check if the statement is an arithmetic operation."""
-        return self.is_command() \
-               and re.match('^s(ll|rl|ra)'
-                            + '|(mfhi|mflo|abs|neg|and|[xn]?or)'
-                            + '|(add|sub|slt)u?'
-                            + '|(add|sub|mult|div|abs|neg|sqrt|c)\.[sd]$', \
-                            self.name)
-
-    def is_monop(self):
-        """Check if the statement is an unary operation."""
-        return len(self) == 2 and self.is_arith()
-
-    def is_binop(self):
-        """Check if the statement is an binary operation."""
-        return self.is_command() and len(self) == 3 and not self.is_jump()
-        
-    def is_load_non_immediate(self):
-        """Check if the statement is a load statement."""
-        return self.is_command() \
-               and re.match('^l(w|a|b|bu|\.d|\.s)|dlw$', \
-                            self.name)
-    def is_logical(self):
-        """Check if the statement is a logical operator."""
-        return self.is_command() and re.match('^(xor|or|and)i?$', self.name)
-    
-    def is_double_aritmethic(self):
-        """Check if the statement is a arithmetic .d operator."""
-        return self.is_command() \
-                and re.match('^(add|sub|div|mul)\.d$', self.name)
-                
-    def is_double_unary(self):
-        """Check if the statement is a unary .d operator."""
-        return self.is_command() and \
-                re.match('^(abs|neg|mov)\.d$', self.name)
-                
-    def is_move_from_spec(self):
-        """Check if the statement is a move from the result register."""
-        return self.is_command() and self.name in ['mflo', 'mthi']
-        
-    def is_set_if_less(self):
-        """Check if the statement is a shift if less then."""
-        return self.is_command() and self.name in ['slt', 'sltu']
-        
-    def is_convert(self):
-        """Check if the statement is a convert operator."""
-        return self.is_command() and re.match('^cvt\.[a-z\.]*$', self.name)
-        
-    def is_truncate(self):
-        """Check if the statement is a convert operator."""
-        return self.is_command() and re.match('^trunc\.[a-z\.]*$', self.name)
-        
-    def jump_target(self):
-        """Get the jump target of this statement."""
-        if not self.is_jump():
-            raise Exception('Command "%s" has no jump target' % self.name)
-
-        return self[-1]
-    
-    def get_def(self):
-        """Get the variable that this statement defines, if any."""
-        instr = ['move', 'addu', 'subu', 'li', 'mtc1', 'dmfc1']
-        
-        if self.is_load_non_immediate() or self.is_arith() \
-                or self.is_logical() or self.is_double_aritmethic() \
-                or self.is_move_from_spec() or self.is_double_unary() \
-                or self.is_set_if_less() or self.is_convert() \
-                or self.is_truncate() or self.is_load() \
-                or (self.is_command and self.name in instr):
-            return self[0]
-
-        return []
-
-    def get_use(self):
-        # TODO: Finish with ALL the available commands!
-        use = []
-
-        if self.is_binop():
-            use += self[1:]
-        elif self.is_command('move'):
-            use.append(self[1])
-        elif self.is_command('lw', 'sb', 'sw', 'dsw', 's.s', 's.d'):
-            m = re.match('^\d+\(([^)]+)\)$', self[1])
-
-            if m:
-                use.append(m.group(1))
-
-            # 'sw' also uses its first argument
-            if self.name in ['sw', 'dsw']:
-                use.append(self[0])
-        elif len(self) == 2:  # FIXME: temporary fix, manually add all commands
-            use.append(self[1])
-
-        return use
-
-    def defines(self, reg):
-        """Check if this statement defines the given register."""
-        return reg in self.get_def()
-
-    def uses(self, reg):
-        """Check if this statement uses the given register."""
-        return reg in self.get_use()
-
-
 class Block:
-    def __init__(self, expressions=[]):
-        self.expressions = expressions
-        self.pointer = 0
+  def __init__(self, expressions=[]):
+    self.expressions = expressions
+    self.position = 0
 
-    def __iter__(self):
-        return iter(self.expressions)
+  def __iter__(self):
+    return iter(self.expressions)
 
-    def __getitem__(self, n):
-        return self.expressions[n]
+  def __getitem__(self, key):
+    return self.expressions[key]
 
-    def __len__(self):
-        return len(self.expressions)
+  def __len__(self):
+    return len(self.expressions)
 
-    def read(self, count=1):
-        """Read the statement at the current pointer position and move the
-        pointer one position to the right."""
-        s = self.expressions[self.pointer]
-        self.pointer += 1
+  # Returns false if the variable position is not at the checkPosition of the list of
+  # expressions and true if it is at the checkPosition of the list of expressions.
+  def checkPosition(self):
+    if len(self) != self.position:
+      return False
+    else:
+      return True
 
-        return s
+  # Read expression at the current position. Then move position one further.
+  def readExpression(self, c = 1):
+    self.position = self.position + 1
+    return self.expressions[self.position - 1]
 
-    def end(self):
-        """Check if the pointer is at the end of the statement list."""
-        return self.pointer == len(self)
+  # Using the present position read expressions until until an offset.
+  def readExpressionsOffset(self, c = 1):
+    if self.checkPosition() == True:
+      if c != 1:
+        return []
+      else:
+        return Expression('empty', '')
+    if c != 1:
+      return self.expressions[self.position : self.position + c]
+    else:
+      return self.expressions[self.position]
 
-    def peek(self, count=1):
-        """Read the statements until an offset from the current pointer
-        position."""
-        if self.end():
-            return Statement('empty', '') if count == 1 else []
+    # Reset position and reverse the list of expressions.
+  def resetAndReverse(self):
+    self.position = 0
+    self.expressions.reverse()
 
-        return self.expressions[self.pointer] if count == 1 \
-               else self.expressions[self.pointer:self.pointer + count]
+  def putIn(self, expression, i = None):
+    i = i if i != None else self.position
+    self.expressions.insert(i, expression)
 
-    def replace(self, count, replacement, start=None):
-        """Replace the given range start-(start + count) with the given
-        statement list, and move the pointer to the first statement after the
-        replacement."""
-        if self.pointer == 0:
-            raise Exception('No statement have been read yet.')
+  def cleanUp(self, cb):
+    expres = self.expressions
+    self.expressions = filter(cb, expres)
 
-        if start == None:
-            start = self.pointer - 1
+  # Replace the current with a substitute list of expressions. 
+  # Then adjust the position. 
+  def substitute(self, c, sub, begin = None):
+    if begin == None:
+      begin = self.position - 1
+    if self.position == 0:
+      raise Exception()
 
-        before = self.expressions[:start]
-        after = self.expressions[start + count:]
-        self.expressions = before + replacement + after
-        self.pointer = start + len(replacement)
+    self.position = len(sub) + begin
+    self.expressions = self.expressions[:begin] + sub + self.expressions[begin + c:]
 
-    def insert(self, statement, index=None):
-        if index == None:
-            index = self.pointer
+class Expression:
+  eID = 1
 
-        self.expressions.insert(index, statement)
+  def __init__(self, typeExpression, name, *args, **otherArgs):
+    self.typeE = typeExpression
+    self.name = name
+    self.args = list(args)
+    self.otherArgs = otherArgs
+    self.eID = Expression.eID
+    Expression.eID = 1 + Expression.eID
 
-    def apply_filter(self, callback):
-        """Apply a filter to the statement list. If the callback returns True,
-        the statement will remain in the list.."""
-        self.expressions = filter(callback, self.expressions)
+  def __getitem__(self, key):
+    return self.args[key]
 
-    def reverse_statements(self):
-        """Reverse the statement list and reset the pointer."""
-        self.expressions = self.expressions[::-1]
-        self.pointer = 0
+  def __setitem__(self, key, v):
+    self.args[key] = v
+
+  def __eq__(self, express):
+    if express.name == self.name and express.typeE == self.typeE \
+       and express.args == self.args:
+      return True
+    else:
+      return False
+
+  def __len__(self):
+    return len(self.args)
+
+  def __str__(self):
+    details = '<Expression: eID = %d type = %s name = %s  args = %s>' \
+               % (self.eID, self.typeE, self.name, self.args)
+    return details
+
+  def __repr__(self):
+    return str(self)
+
+  def checkNote(self):
+    if self.typeE != 'note':
+      return False
+    else:
+      return True
+
+  def checkNoteInline(self):
+    if self.otherArgs['inline'] and self.typeE == 'note':
+      return True
+    else:
+      return False
+
+  def checkDirective(self):
+    if self.typeE != 'directive':
+      return False
+    else:
+      return True
+
+  def checkLabel(self, name = None):
+    if name != None:
+      if self.typeE == 'label' and self.name == name:
+        return True
+      else:
+        return False
+    else:
+      if self.typeE != 'label':
+        return False
+      else:
+        return True  
+
+  def checkControl(self, *args):
+    if (self.name in args or not len(args)) and self.typeE == 'command':
+      return True
+    else:
+      return False
+
+  def checkBranch(self):
+    if re.match('bne|beq|bgtz|bltz|bct|bgez|bcf|blez$', self.name) \
+       and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  def checkJump(self):
+    if re.match('^bne|beq|jal|j|bgtz|bltz|bct|bgez|bcf|blez$', self.name) \
+      and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  def getTargetJump(self):
+    if self.checkJump() == True:
+      return self[-1]
+    else:
+      raise Exception('Command "%s" does not contain a target jump' % self.name)
+
+  def checkShift(self):
+    if (re.match('^s(rl|ra|ll)$', self.name) and self.checkControl()) == True:
+      return True
+    else:
+      return False
+
+  def checkShift2(self):
+    cmds = ['sltu', 'slt']
+    for i in range(0, len(cmds)):
+      if self.name == cmds[i] and self.checkControl() == True:
+        return True
+    return False
+
+  def checkLoad(self):
+    cmds = ['dlw', 'l.s', 'l.d', 'li', 'lw'] 
+    for i in range(0, len(cmds)):
+      if self.name == cmds[i] and self.checkControl() == True:
+        return True
+    return False  
+
+  def checkLoad2(self):
+    if re.match('^l(bu|a|w||\.s|b|\.d)|dlw$', self.name) \
+       and self.checkControl() == True:
+      return True
+    else:
+      return False  
+
+  def checkArithmetic(self):
+    if re.match('^s(rl|ra|ll)|(and|neg|mflo|mfhi|abs|[xn]?or)|(slt|add|sub)u?'
+                + '|sqrt|neg|div|abs|mult|c|add|sub)\.[sd]$', self.name) \
+       and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  def checkArithmeticD(self):
+    if re.match('^(div|add|mul|sub)\.d$', self.name) \
+       and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  def checkMonop(self):
+    if not (self.checkArithmetic() == True and len(self) == 2):
+      return False
+    else:
+      return True
+
+  def checkBinop(self):
+    if len(self) == 3 and self.checkJump() == False \
+       and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  def checkMove(self):
+    cmds = ['mthi', 'mflo'] 
+    for i in range(0, len(cmds)):
+      if self.name == cmds[i] and self.checkControl() == True:
+        return True
+    return False
+
+  def checkTruncate(self):
+    if re.match('^trunc\.[a-z\.]*$', self.name) and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  def checkConvert(self):
+    if re.match('^cvt\.[a-z\.]*$', self.name) and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  def checkLogical(self):
+    if re.match('^(and|xor|or)i?$', self.name) and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  def checkUnaryD(self):
+    if re.match('^(neg|abs|mov)\.d$', self.name) and self.checkControl() == True:
+      return True
+    else:
+      return False
+
+  def checkDefinition(self, register):
+    definition = self.retrieve()
+    return register in definition
+
+  def checkUsage(self, register):
+    usage = self.retrieveUsage()
+    return register in usage
+
+  def retrieve(self):
+    if self.checkLoad() == True or self.checkLogical() == True \
+       or self.checkArithmetic() == True or self.checkArithmeticD() == True \
+       or self.checkConvert() == True or self.checkTruncate() == True \
+       or self.checkLoad2() == True or self.checkUnaryD() == True \
+       or self.checkShift2() == True or self.checkMove() == True \
+       or (self.name in ['addu', 'li', 'mtc1', 'move', 'dmfc1', 'subu'] \
+           and self.checkControl() == True):
+      return self[0]
+    else:
+      return []
+
+  def retrieveUsage(self):
+    retrieved = []
+    
+    if self.checkControl('move') == True or len(self) == 2:
+      retrieved.append(self[1])
+    elif self.checkControl('sw', 'sb', 'dsw', 's.d', 's.s', 'lw'):
+      if re.match('^d+\(([^)]+)\)$', self[1]) == True:
+        retrieved.append(re.match('^d+\(([^)]+)\)$', self[1]).group(1))
+        cmds = ['dsw', 'sw']
+        for i in range(0, len(cmds)):
+          if self.name == cmds[i]:
+            retrieved.append(self[0])
+    elif self.checkBinop():
+      retrieved = retrieved + self[1:]
+
+    return retrieved
+

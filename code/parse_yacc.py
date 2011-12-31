@@ -1,6 +1,6 @@
 import ply.yacc as yacc
 from parse_lex import tokens
-from peep import Statement as S, Block
+from peep import Expression as S, Block
 
 
 # Global statements administration
