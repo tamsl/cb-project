@@ -6,7 +6,7 @@ def writeAssemblyCodeInFile(fileName, expressions):
   file_func.write(createAssemblyCode(expressions))
   file_func.close()
 
-# Create assembly code using a list of expressions. 
+# Create assembly code using a list of expressions.
 def createAssemblyCode(expressions):
   assemblyCode = ''
   previous = ''
@@ -187,7 +187,7 @@ class Expression:
       return True
     else:
       return False
-
+  """
   # Checking Branch expression
   def checkBranch(self):
     if re.match('bne|beq|bgtz|bltz|bct|bgez|bcf|blez$', self.name) \
@@ -195,7 +195,7 @@ class Expression:
       return True
     else:
       return False
-
+  """
   # Checking Jump expression
   def checkJump(self):
     if re.match('^bne|beq|jal|j|bgtz|bltz|bct|bgez|bcf|blez$', self.name) \
@@ -203,21 +203,21 @@ class Expression:
       return True
     else:
       return False
-
+  """
   # Checking Target Jump expression
   def getTargetJump(self):
     if self.checkJump() == True:
       return self[-1]
     else:
       raise Exception('Command "%s" does not contain a target jump' % self.name)
-
+  """
   # Checking Shift expression
   def checkShift(self):
     if (re.match('^s(rl|ra|ll)$', self.name) and self.checkControl()) == True:
       return True
     else:
       return False
-
+  """
   # Checking Shift 'less then' expression
   def checkShift2(self):
     cmds = ['sltu', 'slt']
@@ -225,7 +225,7 @@ class Expression:
       if self.name == cmds[i] and self.checkControl() == True:
         return True
     return False
-
+  """
   # Checking Load argument expression
   def checkLoad(self):
     cmds = ['dlw', 'l.s', 'l.d', 'li', 'lw'] 
@@ -233,7 +233,7 @@ class Expression:
       if self.name == cmds[i] and self.checkControl() == True:
         return True
     return False  
-
+  """
   # Checking Load expression
   def checkLoad2(self):
     if re.match('^l(bu|a|w||\.s|b|\.d)|dlw$', self.name) \
@@ -319,7 +319,7 @@ class Expression:
   def checkUsage(self, register):
     usage = self.retrieveUsage()
     return register in usage
-  
+
   # Retrieve expression variables
   def retrieve(self):
     if self.checkLoad() == True or self.checkLogical() == True \
@@ -349,4 +349,4 @@ class Expression:
     elif self.checkBinop():
       retrieved = retrieved + self[1:]
     return retrieved
-
+  """
