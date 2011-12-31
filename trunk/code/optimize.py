@@ -105,8 +105,8 @@ def getRidOfRedundancy(block):
 
   while prev != len(block):
     prev = len(block)
-    while not block.checkPosition():
-      ex = block.readExpression()
+    while not block.end():
+      ex = block.read()
       for func in funcs:
         if func(ex, block):
           switch = True
@@ -136,31 +136,21 @@ def optimize_block(block):
   while getRidOfRedundancy(block):
     pass
 
-def optimizer(expressions, verbose=0):
-  """  lengths = []
-  lengths1.append(len(expressions))
+def optimize(expressions, verbose=0):
+  lengths = []
+  lengths.append(len(expressions))
   beq_bne(expressions)
-  lengths2.append(len(expressions))
+  lengths.append(len(expressions))
 
   blocks = bbs_find(expressions)
   map(optimize_block, blocks)
   blockExpressions = map(lambda blck: blck.expressions, blocks)
   optimizedBlocks = reduce(lambda x, y: x + y, blockExpressions)
-  lengths3.append(len(optimizedBlocks)) """
-  o = len(expressions)
-  beq_bne(expressions)
-  g = len(expressions)
-
-  # Optimize basic blocks
-  blocks = bbs_find(expressions)
-  map(optimize_block, blocks)
-  block_statements = map(lambda b: b.expressions, blocks)
-  opt_blocks = reduce(lambda a, b: a + b, block_statements)
-  b = len(opt_blocks)
+  lengths.append(len(optimizedBlocks))
 
   if verbose:
-    print 'Expressions:     %d' % o
-    print 'Optimization:    %d' % g
-    print 'BB optimization: %d' % b
+    print 'Expressions:     %d' % lengths[0]
+    print 'Optimization:    %d' % lengths[1]
+    print 'BB optimization: %d' % lengths[2]
   
-  return opt_blocks
+  return optimizedBlocks
