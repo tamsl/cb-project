@@ -12,7 +12,7 @@ if __name__ == '__main__':
     sys.exit(1)    
   # Parsing and optimization
   parsed = parse(sys.argv[1])
-  new = optimize(parsed, verbose=1)
+  new = optimize(parsed, var=1)
   try:
     if len(sys.argv) > 2:
       file_func = open(sys.argv[2], 'w+')
