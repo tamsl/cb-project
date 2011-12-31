@@ -10,45 +10,45 @@ tokens = (
   'WORD'
 )
 
-def t_COLON(tok):
+def t_COLON(t):
   r':'
-  return tok
+  return t
 
-def t_COMMA(tok):
+def t_COMMA(t):
   r','
-  return tok
+  return t
 
-def t_COMMENT(tok):
+def t_COMMENT(t):
   r'\#.+'
-  return tok
+  return t
 
-def t_DIRECTIVE(tok):
+def t_DIRECTIVE(t):
   r'\..+'
-  return tok
+  return t
 
 def t_NEWLINE(t):
   r'\n+'
   t.lexer.lineno += t.value.count('\n')
-  return tok
+  return t
 
 def t_hex_word(t):
   r'0x([0-9a-fA-F]{8}|[0-9a-fA-F]{4})'
   t.type = 'WORD'
-  return tok
+  return t
 
 def t_offset_address(t):
   r'[0-9]+\([a-zA-Z0-9$_.]+\)'
   t.type = 'WORD'
-  return tok
+  return t
 
 def t_int(t):
   r'-?[0-9]+'
   t.type = 'WORD'
-  return tok
+  return t
 
 def t_WORD(t):
   r'[a-zA-Z0-9$_.+()-]+'
-  return tok
+  return t
 
 #def t_DECI(tok):
 #  r'[0-9]+'
@@ -63,8 +63,8 @@ def t_WORD(t):
 #  return tok
 
 # Handle errors
-def t_error(tok):
-  print("Illegal token '%s'" % tok.value[0])
+def t_error(t):
+  print("Illegal token '%s'" % t.value[0])
   t.lexer.skip(1)
 
 # '[ \t\n]' ' \t\n'
