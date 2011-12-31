@@ -1,84 +1,61 @@
 import ply.lex as lex
 
-# Tokens list
 tokens = (
-  'COLON',
   'COMMA',
-  'COMMENT',
+  'COMMENT', 
+  'COLON',
   'DIRECTIVE',
-  'NEWLINE',
+  'NEWLINE', 
   'WORD'
 )
 
-def t_COLON(t):
-  r':'
-  return t
+# Tokens
+def t_COMMA(tok):
+    r','
+    return tok
 
-def t_COMMA(t):
-  r','
-  return t
+def t_COMMENT(tok):
+    r'\#.*'
+    tok.value = tok.value[1:]
+    return tok
 
-def t_COMMENT(t):
-  r'\#.+'
-  return t
+def t_COLON(tok):
+    r':'
+    return tok
 
-def t_DIRECTIVE(t):
-  r'\..+'
-  return t
+def t_DIRECTIVE(tok):
+    r'\..*'
+    return tok
 
-def t_NEWLINE(t):
-  r'\n+'
-  t.lexer.lineno += t.value.count('\n')
-  return t
+def t_NEWLINE(tok):
+    r'\n+'
+    tok.lexer.lineno += tok.value.count('\n')
+    return tok
 
-def t_hex_word(t):
-  r'0x([0-9a-fA-F]{8}|[0-9a-fA-F]{4})'
-  t.type = 'WORD'
-  return t
+def t_hex(tok):
+    r'0x([0-9a-fA-F]{8}|[0-9a-fA-F]{4})'
+    tok.type = 'WORD'
+    return tok
 
-def t_offset_address(t):
-  r'[0-9]+\([a-zA-Z0-9$_.]+\)'
-  t.type = 'WORD'
-  return t
+def t_offset(tok):
+    r'[0-9]+\([a-zA-Z0-9$_.]+\)'
+    tok.type = 'WORD'
+    return tok
 
-def t_int(t):
-  r'-?[0-9]+'
-  t.type = 'WORD'
-  return t
+def t_dec(tok):
+    r'-?[0-9]+'
+    tok.type = 'WORD'
+    return tok
 
-def t_WORD(t):
-  r'[a-zA-Z0-9$_.+()-]+'
-  return t
+def t_WORD(tok):
+    r'[a-zA-Z0-9$_.+()-]+'
+    return tok
 
-#def t_DECI(tok):
-#  r'[0-9]+'
-#  return tok
+t_ignore = ' \t'
 
-#def t_HEXI(tok):
-#  r'0x[0-9]{8}'
-#  return tok
-
-#def t_OFFSET(tok):
-#  r'[0-9]+\([a-zA-Z0-9$_.]+\)'
-#  return tok
-
-# Handle errors
-def t_error(t):
-  print("Illegal token '%s'" % t.value[0])
-  t.lexer.skip(1)
-
-# '[ \t\n]' ' \t\n'
-t_ignore  = ' \t'
+def t_error(tok):
+    print('Illegal character "%s"' % t.value[0])
+    t.lexer.skip(1)
 
 # Build the lexer
 lexer = lex.lex()
-
-# Input for the lexer
-#lexer.input(data)
-
-# Tokenize
-#while True:
-#  tok = lexer.token()
-#  if not tok:
-#    break      # No more input
-#  print tok

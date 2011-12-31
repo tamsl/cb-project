@@ -1,83 +1,98 @@
 from peep import Block
 
-def definitions(bs):
-    def_bs = {}
-    for block in bs: 
-      for  def_set in block:
-        for def_register in def_set.checkDefinition(): 
-          if def_register in def_bs:
-            defs_bs[def_register].add(def_set.sid)
-          else:
-            id_set = set([def_set.sid])
-            defs_bs[def_register] = id_set
+class BasicBlock(Block):
+    def __init__(self, statements=[]):
+        Block.__init__(self, statements)
+        self.edges_to = []
+        self.edges_from = []
+
+        self.dominates = []
+        self.dominated_by = []
+        self.in_set = set([])
+        self.out_set = set([])
+        self.gen_set = set([])
+        self.kill_set = set([])
+
+    def add_edge_to(self, block):
+        if block not in self.edges_to:
+            self.edges_to.append(block)
+            block.edges_from.append(self)
+
+    def set_dominates(self, block):
+        if block not in self.dominates:
+            self.dominates.append(block)
+            block.dominated_by.append(self)
+
+    def create_gen_kill(self, defs):
+        used = set()
+        self_defs = {}
+
+        # Get the last of each definition series and put in in the `def' set
+        self.gen_set = set()
+
+        for s in reversed(self):
+            for reg in s.get_def():
+                if reg not in self_defs:
+                    print 'Found def:', s
+                    self_defs[reg] = s.sid
+                    self.gen_set.add(s.sid)
+
+        # Generate kill set
+        self.kill_set = set()
+
+        for reg, statement_ids in defs.iteritems():
+            if reg in self_defs:
+                add = statement_ids - set([self_defs[reg]])
+            else:
+                add = statement_ids
+
+            self.kill_set |= add
+
+
+def defs(blocks):
+    # Collect definitions of all registers
+    defs = {}
+
+    for b in blocks:
+        for s in b:
+            for reg in s.get_def():
+                if reg not in defs:
+                    defs[reg] = set([s.sid])
+                else:
+                    defs[reg].add(s.sid)
+
     return defs
 
-def head(expressions):
-    heads = [0]
-    tar = []
-    for x, expression in enumerate(expressions[1:]):
-        next = (x + 1)
-        if expression.checkLabel() and next not in heads \
-                and expression.name in tar:
-            heads.append(next)
-        if expression.checkJump():
-            heads.append(x + 2)
-            tar.append(expression[-1])
-    heads.sort()
-    return heads
+def find_leaders(statements):
+    leaders = [0]
+    jump_target_labels = []
 
-def bbs_find(expressions):
-    heads = head(expressions)
-    len_expr = len(head(expressions)) - 1
-    bs_hd = expressions[heads[-1]:]
-    bs = []
-    for x in range(len_expr):
-        bs_expr = expressions[heads[i]:heads[x + 1]]
-        bs.append(bb(bs_expr))
-        heads = head(expressions)
-    bs.append(bb(bs_hd))
-    return bs
+    # Append statements following jumps and save jump target labels
+    for i, statement in enumerate(statements[1:]):
+        if statement.is_jump():
+            leaders.append(i + 2)
+            jump_target_labels.append(statement[-1])
 
-class bb(Block):
-    def __init__(self, expressions=[]):
-        Block.__init__(self, expressions)
-        self.force = []
-        self.forced = []
-        self.edges1 = []
-        self.edges2 = []
-        self.setKill = set([])
-        self.setGen = set([])
+    # Append jump targets
+    for i, statement in enumerate(statements[1:]):
+        if i + 1 not in leaders \
+                and statement.is_label() \
+                and statement.name in jump_target_labels:
+            leaders.append(i + 1)
 
-    def forcing(self, block):
-        for1 = self.force
-        for2 = self.forced
-        if b not in for1:
-            for1.append(b)
-            for2.append(b)
+    leaders.sort()
 
-    def edges(self, block):
-        edge_i = self.edges1
-        edge_o = self.edges2
-        if b not in edge_o:
-            edge_o.append(b)
-            edge_i.append(b)
+    return leaders
 
-    def sets(self, definitions):
-        handled_set = set()
-        self.setKill = set()
-        self.setGen = set()
-        rev = reversed(self)
-        defs = {}
-        for def_register, id_expr in defs.iteritems():
-            if def_register not in defs:
-                count = id_expr
-            else:
-                count = id_expr - set([defs[def_register]])
-            self.setKill |= count
-        for def_set in rev:
-          for def_register in def_set.checkDefinition():
-                if def_register not in defs:
-                    print 'Found def:', def_set
-                    defs[def_register] = def_set.sid
-                    self.setGen.add(def_set.sid)
+def find_basic_blocks(statements):
+    """Divide a statement list into basic blocks. Returns a list of basic
+    blocks, which are also statement lists."""
+    leaders = find_leaders(statements)
+    blocks = []
 
+    for i in range(len(leaders) - 1):
+        blocks.append(BasicBlock(statements[leaders[i]:leaders[i + 1]]))
+
+    blocks.append(BasicBlock(statements[leaders[-1]:]))
+
+    return blocks
