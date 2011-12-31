@@ -26,7 +26,7 @@ def main():
     sys.exit("Not able to open input file: " + options.input)
   # Parse and optimization
   parsing = parse_yacc.parse(in_file.readlines())
-  optimized = optimize(parsing)
+  optimized = optimize.optimizer(parsing)
   in_file.close()
 
   # Controlling input of assembly file

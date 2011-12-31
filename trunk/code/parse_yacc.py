@@ -3,7 +3,7 @@ from parse_lex import tokens
 from peep import Expression, Block
 import sys
 expressions = []
-
+raise_on_error = False
 beginning = 'system'
 
 def p_system(p):
@@ -57,8 +57,13 @@ def p_command(p):
   '''
   expressions.append(Expression('command', p[1], *list(p)[2::2]))
 
+error_count = 0
 def p_error(p):
-  pass
+  print "Syntax error in input!"
+  global raise_on_error
+  global error_count
+  error_count +=1
+  if raise_on_error: raise Exception()
 
 # Build the parser
 parser = yacc.yacc() 
