@@ -3,196 +3,215 @@ Created by PLY version 3.3 (http://www.dabeaz.com/ply)
 Grammar
 
 Rule 0     S' -> system
-Rule 1     system -> list
-Rule 2     list -> COMMENT NEWLINE
-Rule 3     list -> instruction COMMENT NEWLINE
-Rule 4     list -> instruction NEWLINE
-Rule 5     instruction -> command
-Rule 6     instruction -> DIRECTIVE
-Rule 7     instruction -> WORD COLON
-Rule 8     command -> WORD WORD COMMA WORD COMMA WORD
-Rule 9     command -> WORD WORD COMMA WORD
-Rule 10    command -> WORD WORD
-Rule 11    command -> WORD
+Rule 1     system -> <empty>
+Rule 2     system -> system list
+Rule 3     list -> instruction NEWLINE
+Rule 4     list -> COMMENT NEWLINE
+Rule 5     list -> instruction COMMENT NEWLINE
+Rule 6     instruction -> command
+Rule 7     instruction -> DIRECTIVE
+Rule 8     instruction -> WORD COLON
+Rule 9     command -> WORD WORD COMMA WORD COMMA WORD
+Rule 10    command -> WORD WORD COMMA WORD
+Rule 11    command -> WORD WORD
+Rule 12    command -> WORD
 
 Terminals, with rules where they appear
 
-COLON                : 7
-COMMA                : 8 8 9
-COMMENT              : 2 3
-DIRECTIVE            : 6
-NEWLINE              : 2 3 4
-WORD                 : 7 8 8 8 8 9 9 9 10 10 11
+COLON                : 8
+COMMA                : 9 9 10
+COMMENT              : 4 5
+DIRECTIVE            : 7
+NEWLINE              : 3 4 5
+WORD                 : 8 9 9 9 9 10 10 10 11 11 12
 error                : 
 
 Nonterminals, with rules where they appear
 
-command              : 5
-instruction          : 3 4
-list                 : 1
-system               : 0
+command              : 6
+instruction          : 3 5
+list                 : 2
+system               : 2 0
 
 Parsing method: LALR
 
 state 0
 
     (0) S' -> . system
-    (1) system -> . list
-    (2) list -> . COMMENT NEWLINE
-    (3) list -> . instruction COMMENT NEWLINE
-    (4) list -> . instruction NEWLINE
-    (5) instruction -> . command
-    (6) instruction -> . DIRECTIVE
-    (7) instruction -> . WORD COLON
-    (8) command -> . WORD WORD COMMA WORD COMMA WORD
-    (9) command -> . WORD WORD COMMA WORD
-    (10) command -> . WORD WORD
-    (11) command -> . WORD
+    (1) system -> .
+    (2) system -> . system list
 
-    COMMENT         shift and go to state 1
-    DIRECTIVE       shift and go to state 3
-    WORD            shift and go to state 2
+    COMMENT         reduce using rule 1 (system -> .)
+    DIRECTIVE       reduce using rule 1 (system -> .)
+    WORD            reduce using rule 1 (system -> .)
+    $end            reduce using rule 1 (system -> .)
 
-    command                        shift and go to state 7
-    instruction                    shift and go to state 4
-    list                           shift and go to state 5
-    system                         shift and go to state 6
+    system                         shift and go to state 1
 
 state 1
 
-    (2) list -> COMMENT . NEWLINE
+    (0) S' -> system .
+    (2) system -> system . list
+    (3) list -> . instruction NEWLINE
+    (4) list -> . COMMENT NEWLINE
+    (5) list -> . instruction COMMENT NEWLINE
+    (6) instruction -> . command
+    (7) instruction -> . DIRECTIVE
+    (8) instruction -> . WORD COLON
+    (9) command -> . WORD WORD COMMA WORD COMMA WORD
+    (10) command -> . WORD WORD COMMA WORD
+    (11) command -> . WORD WORD
+    (12) command -> . WORD
+
+    COMMENT         shift and go to state 2
+    DIRECTIVE       shift and go to state 5
+    WORD            shift and go to state 4
+
+    command                        shift and go to state 7
+    instruction                    shift and go to state 3
+    list                           shift and go to state 6
+
+state 2
+
+    (4) list -> COMMENT . NEWLINE
 
     NEWLINE         shift and go to state 8
 
 
-state 2
-
-    (7) instruction -> WORD . COLON
-    (8) command -> WORD . WORD COMMA WORD COMMA WORD
-    (9) command -> WORD . WORD COMMA WORD
-    (10) command -> WORD . WORD
-    (11) command -> WORD .
-
-    COLON           shift and go to state 9
-    WORD            shift and go to state 10
-    COMMENT         reduce using rule 11 (command -> WORD .)
-    NEWLINE         reduce using rule 11 (command -> WORD .)
-
-
 state 3
 
-    (6) instruction -> DIRECTIVE .
+    (3) list -> instruction . NEWLINE
+    (5) list -> instruction . COMMENT NEWLINE
 
-    COMMENT         reduce using rule 6 (instruction -> DIRECTIVE .)
-    NEWLINE         reduce using rule 6 (instruction -> DIRECTIVE .)
+    NEWLINE         shift and go to state 10
+    COMMENT         shift and go to state 9
 
 
 state 4
 
-    (3) list -> instruction . COMMENT NEWLINE
-    (4) list -> instruction . NEWLINE
+    (8) instruction -> WORD . COLON
+    (9) command -> WORD . WORD COMMA WORD COMMA WORD
+    (10) command -> WORD . WORD COMMA WORD
+    (11) command -> WORD . WORD
+    (12) command -> WORD .
 
-    COMMENT         shift and go to state 11
-    NEWLINE         shift and go to state 12
+    COLON           shift and go to state 11
+    WORD            shift and go to state 12
+    NEWLINE         reduce using rule 12 (command -> WORD .)
+    COMMENT         reduce using rule 12 (command -> WORD .)
 
 
 state 5
 
-    (1) system -> list .
+    (7) instruction -> DIRECTIVE .
 
-    $end            reduce using rule 1 (system -> list .)
+    NEWLINE         reduce using rule 7 (instruction -> DIRECTIVE .)
+    COMMENT         reduce using rule 7 (instruction -> DIRECTIVE .)
 
 
 state 6
 
-    (0) S' -> system .
+    (2) system -> system list .
 
+    COMMENT         reduce using rule 2 (system -> system list .)
+    DIRECTIVE       reduce using rule 2 (system -> system list .)
+    WORD            reduce using rule 2 (system -> system list .)
+    $end            reduce using rule 2 (system -> system list .)
 
 
 state 7
 
-    (5) instruction -> command .
+    (6) instruction -> command .
 
-    COMMENT         reduce using rule 5 (instruction -> command .)
-    NEWLINE         reduce using rule 5 (instruction -> command .)
+    NEWLINE         reduce using rule 6 (instruction -> command .)
+    COMMENT         reduce using rule 6 (instruction -> command .)
 
 
 state 8
 
-    (2) list -> COMMENT NEWLINE .
+    (4) list -> COMMENT NEWLINE .
 
-    $end            reduce using rule 2 (list -> COMMENT NEWLINE .)
+    COMMENT         reduce using rule 4 (list -> COMMENT NEWLINE .)
+    DIRECTIVE       reduce using rule 4 (list -> COMMENT NEWLINE .)
+    WORD            reduce using rule 4 (list -> COMMENT NEWLINE .)
+    $end            reduce using rule 4 (list -> COMMENT NEWLINE .)
 
 
 state 9
 
-    (7) instruction -> WORD COLON .
+    (5) list -> instruction COMMENT . NEWLINE
 
-    COMMENT         reduce using rule 7 (instruction -> WORD COLON .)
-    NEWLINE         reduce using rule 7 (instruction -> WORD COLON .)
+    NEWLINE         shift and go to state 13
 
 
 state 10
 
-    (8) command -> WORD WORD . COMMA WORD COMMA WORD
-    (9) command -> WORD WORD . COMMA WORD
-    (10) command -> WORD WORD .
+    (3) list -> instruction NEWLINE .
 
-    COMMA           shift and go to state 13
-    COMMENT         reduce using rule 10 (command -> WORD WORD .)
-    NEWLINE         reduce using rule 10 (command -> WORD WORD .)
+    COMMENT         reduce using rule 3 (list -> instruction NEWLINE .)
+    DIRECTIVE       reduce using rule 3 (list -> instruction NEWLINE .)
+    WORD            reduce using rule 3 (list -> instruction NEWLINE .)
+    $end            reduce using rule 3 (list -> instruction NEWLINE .)
 
 
 state 11
 
-    (3) list -> instruction COMMENT . NEWLINE
+    (8) instruction -> WORD COLON .
 
-    NEWLINE         shift and go to state 14
+    NEWLINE         reduce using rule 8 (instruction -> WORD COLON .)
+    COMMENT         reduce using rule 8 (instruction -> WORD COLON .)
 
 
 state 12
 
-    (4) list -> instruction NEWLINE .
+    (9) command -> WORD WORD . COMMA WORD COMMA WORD
+    (10) command -> WORD WORD . COMMA WORD
+    (11) command -> WORD WORD .
 
-    $end            reduce using rule 4 (list -> instruction NEWLINE .)
+    COMMA           shift and go to state 14
+    NEWLINE         reduce using rule 11 (command -> WORD WORD .)
+    COMMENT         reduce using rule 11 (command -> WORD WORD .)
 
 
 state 13
 
-    (8) command -> WORD WORD COMMA . WORD COMMA WORD
-    (9) command -> WORD WORD COMMA . WORD
+    (5) list -> instruction COMMENT NEWLINE .
 
-    WORD            shift and go to state 15
+    COMMENT         reduce using rule 5 (list -> instruction COMMENT NEWLINE .)
+    DIRECTIVE       reduce using rule 5 (list -> instruction COMMENT NEWLINE .)
+    WORD            reduce using rule 5 (list -> instruction COMMENT NEWLINE .)
+    $end            reduce using rule 5 (list -> instruction COMMENT NEWLINE .)
 
 
 state 14
 
-    (3) list -> instruction COMMENT NEWLINE .
+    (9) command -> WORD WORD COMMA . WORD COMMA WORD
+    (10) command -> WORD WORD COMMA . WORD
 
-    $end            reduce using rule 3 (list -> instruction COMMENT NEWLINE .)
+    WORD            shift and go to state 15
 
 
 state 15
 
-    (8) command -> WORD WORD COMMA WORD . COMMA WORD
-    (9) command -> WORD WORD COMMA WORD .
+    (9) command -> WORD WORD COMMA WORD . COMMA WORD
+    (10) command -> WORD WORD COMMA WORD .
 
     COMMA           shift and go to state 16
-    COMMENT         reduce using rule 9 (command -> WORD WORD COMMA WORD .)
-    NEWLINE         reduce using rule 9 (command -> WORD WORD COMMA WORD .)
+    NEWLINE         reduce using rule 10 (command -> WORD WORD COMMA WORD .)
+    COMMENT         reduce using rule 10 (command -> WORD WORD COMMA WORD .)
 
 
 state 16
 
-    (8) command -> WORD WORD COMMA WORD COMMA . WORD
+    (9) command -> WORD WORD COMMA WORD COMMA . WORD
 
     WORD            shift and go to state 17
 
 
 state 17
 
-    (8) command -> WORD WORD COMMA WORD COMMA WORD .
+    (9) command -> WORD WORD COMMA WORD COMMA WORD .
 
-    COMMENT         reduce using rule 8 (command -> WORD WORD COMMA WORD COMMA WORD .)
-    NEWLINE         reduce using rule 8 (command -> WORD WORD COMMA WORD COMMA WORD .)
+    NEWLINE         reduce using rule 9 (command -> WORD WORD COMMA WORD COMMA WORD .)
+    COMMENT         reduce using rule 9 (command -> WORD WORD COMMA WORD COMMA WORD .)
 
