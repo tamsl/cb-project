@@ -133,7 +133,7 @@ def optimizer(expressions, verbose=0):
   optimizedBlocks = reduce(lambda x, y: x + y, blockExpressions)
   lengths.append(len(optimizedBlocks))
 
-  if var:
+  if verbose:
     print 'Expressions:     %d' % lengths[0]
     print 'Optimization:    %d' % lengths[1]
     print 'BB optimization: %d' % lengths[2]
