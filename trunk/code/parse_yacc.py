@@ -80,5 +80,5 @@ def parse(p):
      yacc.parse(content)
      print 'errors: %d\n' % error_count
    except IOError:
-     raise Exception('File "%s" could not be opened' % filename)
+     raise Exception('File "%s" could not be opened' % p)
    return Block(statements) 

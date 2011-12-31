@@ -1,21 +1,22 @@
 from peep import Block
 
-def bbs_find(expressions):
-    len_expr = len(head(expressions)) - 1
-    bs_hd = expressions[heads[-1]:]
-    bs = []
-    for x in range(len_expr):
-        bs_expr = expressions[heads[i]:heads[x + 1]
-        bs.append(bb(bs_expr))
-        heads = head(expressions)
-    bs.append(bb(bs_hd))
-    return bs
+def definitions(bs):
+    def_bs = {}
+    for b in bs: 
+      for  def_set in b:
+        for def_register in def_set.checkDefinition(): 
+          if def_register in def_bs:
+            defs_bs[def_register].add(def_set.sid)
+          else:
+            id_set = set([def_set.sid])
+            defs_bs[def_register] = id_set
+    return defs
 
 def head(expressions):
     heads = [0]
     tar = []
-    next = x + 1
     for x, expression in enumerate(expressions[1:]):
+        next = (x + 1)
         if expression.checkLabel() and next not in heads \
                 and expression.name in tar:
             heads.append(next)
@@ -25,17 +26,17 @@ def head(expressions):
     heads.sort()
     return heads
 
-def definitions(bs):
-    def_bs = {}
-    for b in bs 
-      for  def_set in b:
-        for def_register not in defs_bs 
-          if def_register not in def_set.checkDefinition():
-            defs_bs[def_register].add(def_set.sid)
-          else:
-            id_set = set([def_set.sid])
-            defs_bs[def_register] = id_set
-    return defs
+def bbs_find(expressions):
+    heads = head(expressions)
+    len_expr = len(head(expressions)) - 1
+    bs_hd = expressions[heads[-1]:]
+    bs = []
+    for x in range(len_expr):
+        bs_expr = expressions[heads[i]:heads[x + 1]]
+        bs.append(bb(bs_expr))
+        heads = head(expressions)
+    bs.append(bb(bs_hd))
+    return bs
 
 class bb(Block):
     def __init__(self, expressions=[]):
@@ -79,3 +80,4 @@ class bb(Block):
                     print 'Found def:', def_set
                     defs[def_register] = def_set.sid
                     self.setGen.add(def_set.sid)
+
