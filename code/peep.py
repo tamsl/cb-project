@@ -112,7 +112,7 @@ class Expression:
   eID = 1
 
   def __init__(self, name, typeExpression, *args, **otherArgs):
-    self.eID = Expression.sid
+    self.eID = Expression.eID
     Expression.eID = 1 + Expression.eID
     self.name = name
     self.typeE = typeExpression
