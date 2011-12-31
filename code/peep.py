@@ -194,7 +194,7 @@ class Expression:
       return False
 
   def checkShift(self):
-    if re.match('^s(rl|ra|ll)$', self.name) and self.checkCommand() == True:
+    if (re.match('^s(rl|ra|ll)$', self.name) and self.checkCommand()) == True:
       return True
     else:
       return False

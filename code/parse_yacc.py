@@ -2,6 +2,7 @@ import ply.yacc as yacc
 from parse_lex import tokens
 from peep import Expression, Block
 import sys
+
 expressions = []
 error_count = 0
 raise_on_error = False
@@ -71,9 +72,9 @@ parser = yacc.yacc()
 def parse(p):
    """Parse a given Assembly file, return a Block with Statement objects
    containing the parsed instructions."""
-   global statements
+   global expressions
 
-   statements = []
+   expressions = []
 
    try:
      content = open(p).read()
@@ -81,4 +82,4 @@ def parse(p):
      print 'errors: %d\n' % error_count
    except IOError:
      raise Exception('File "%s" could not be opened' % p)
-   return Block(statements) 
+   return Block(expressions) 

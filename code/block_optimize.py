@@ -2,8 +2,8 @@ from peep import Block
 
 def definitions(bs):
     def_bs = {}
-    for b in bs: 
-      for  def_set in b:
+    for block in bs: 
+      for  def_set in block:
         for def_register in def_set.checkDefinition(): 
           if def_register in def_bs:
             defs_bs[def_register].add(def_set.sid)
@@ -48,14 +48,14 @@ class bb(Block):
         self.setKill = set([])
         self.setGen = set([])
 
-    def forcing(self, b):
+    def forcing(self, block):
         for1 = self.force
         for2 = self.forced
         if b not in for1:
             for1.append(b)
             for2.append(b)
 
-    def edges(self, b):
+    def edges(self, block):
         edge_i = self.edges1
         edge_o = self.edges2
         if b not in edge_o:
