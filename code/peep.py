@@ -2,13 +2,13 @@ import re
 
 # Write the created assembly code in the file.
 def writeAssemblyCodeInFile(fileName, expressions):
-  file_func = open(fileName, 'w+')
-  file_func.write(createAssemblyCode(expressions))
-  file_func.close()
+  f.write(createAssemblyCode(expressions))
+  f = open(fileName, 'w+')
+  f.close()
 
 # Create assembly code using a list of expressions.
 def createAssemblyCode(expressions):
-  assemblyCode = ''
+  out = ''
   previous = ''
   spacing = 0
 
@@ -40,10 +40,10 @@ def createAssemblyCode(expressions):
     else:
       raise Exception
 
-    assemblyCode = assemblyCode + (newLine + line)
+    output = output + (newLine + line)
     previous = line
-
-  return (assemblyCode + '\n')
+    output = output + '\n'
+  return output
 
 # Class of Block
 class Block:
@@ -73,7 +73,7 @@ class Block:
     self.position = self.position + 1
     return self.expressions[self.position - 1]
 
-  # Using the present position read expressions until until an offset.
+  # Using the present position read expressions until an offset.
   def readExpressionsOffset(self, c = 1):
     if self.checkPosition() == True:
       if c != 1:
