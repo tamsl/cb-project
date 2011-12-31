@@ -1,3 +1,4 @@
+from math import log
 import re
 from block_optimize import bbs_find
 
@@ -105,7 +106,7 @@ def getRidOfRedundancy(block):
   while prev != len(block):
     prev = len(block)
     while not block.checkPosition():
-      ex = block.read()
+      ex = block.readExpression()
       for func in funcs:
         if func(ex, block):
           switch = True
@@ -131,25 +132,35 @@ def getRidOfRedundancy(block):
   return switch
   """
 def optimize_block(block):
-    """Optimize a basic block."""
-    while getRidOfRedundancy(block):
-        pass
+  """Optimize a basic block."""
+  while getRidOfRedundancy(block):
+    pass
 
 def optimizer(expressions, verbose=0):
-  lengths = []
-  lengths.append(len(expressions))
+  """  lengths = []
+  lengths1.append(len(expressions))
   beq_bne(expressions)
-  lengths.append(len(expressions))
+  lengths2.append(len(expressions))
 
   blocks = bbs_find(expressions)
   map(optimize_block, blocks)
   blockExpressions = map(lambda blck: blck.expressions, blocks)
   optimizedBlocks = reduce(lambda x, y: x + y, blockExpressions)
-  lengths.append(len(optimizedBlocks))
+  lengths3.append(len(optimizedBlocks)) """
+  o = len(expressions)
+  beq_bne(expressions)
+  g = len(expressions)
+
+  # Optimize basic blocks
+  blocks = bbs_find(expressions)
+  map(optimize_block, blocks)
+  block_statements = map(lambda b: b.expressions, blocks)
+  opt_blocks = reduce(lambda a, b: a + b, block_statements)
+  b = len(opt_blocks)
 
   if verbose:
-    print 'Expressions:     %d' % lengths[0]
-    print 'Optimization:    %d' % lengths[1]
-    print 'BB optimization: %d' % lengths[2]
+    print 'Expressions:     %d' % o
+    print 'Optimization:    %d' % g
+    print 'BB optimization: %d' % b
   
-  return optimizedBlocks
+  return opt_blocks
