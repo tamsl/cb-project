@@ -128,7 +128,7 @@ def optimizer(expressions, var = 0):
   lengths.append(len(expressions))
 
   blocks = bbs_find(expressions)
-  blockExpressions = map(lamda blck: blck.expressions, blocks)
+  blockExpressions = map(lambda blck: blck.expressions, blocks)
   optimizedBlocks = reduce(lambda x, y: x + y, blockExpressions)
   lengths.append(len(optimizedBlocks))
 
@@ -137,4 +137,4 @@ def optimizer(expressions, var = 0):
     print 'Optimization:    %d' % lengths[1]
     print 'BB optimization: %d' % lengths[2]
   
- return optimizedBlocks
+  return optimizedBlocks

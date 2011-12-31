@@ -1,7 +1,7 @@
 import ply.yacc as yacc
 from parse_lex import tokens
 from peep import Expression, Block
-
+import sys
 expressions = []
 
 beginning = 'system'
@@ -64,15 +64,35 @@ def p_error(p):
 parser = yacc.yacc() 
 
 def parse(p):
-  global expressions
-  expressions = []
+  #  """Parse a given Assembly file, return a Block with Statement objects
+  # containing the parsed instructions."""
+  #  global statements
 
-  try:
-    to_parse = open(p).read()
-    yacc.parse(to_parse)
-  except IOError:
-    raise Exception('Wrong file "%s"' % p)
-  parsed = parser.parse(to_parse)
-  print parsed
+   # statements = []
 
-  return Block(expressions)
+   # try:
+   #     content = open(filename).read()
+   #     yacc.parse(content)
+   # except IOError:
+   #     raise Exception('File "%s" could not be opened' % filename)
+#
+   # return Block(statements) 
+  if len(sys.argv) > 1:
+    counter = 1
+    for line in open(sys.argv[0], 'r').readlines():
+      if not line.strip(): continue
+      result = parser.parse(line)
+      print counter, result
+      counter +=1
+      #if counter % 50 == 0: raw_input('pres key')
+    print 'errors: %d\n' % error_count
+    # interactive
+  else:
+    while True:
+     try:
+       s = raw_input('asmyacc > ')
+     except EOFError:
+       break
+     if not s: continue
+     result = parser.parse(s)
+     print repr(result)
