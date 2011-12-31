@@ -1,4 +1,5 @@
 import re
+from block_optimize import bbs_find
 
 def moves(opt, expressions, t):
   # Original sequence | Replacement
@@ -57,8 +58,8 @@ def beq_bne(expressions):
   prev = -1
   while prev != len(expressions):
     prev = len(expressions)
-    while not expressions.end():
-      e = expressions.read()
+    while not expressions.checkPosition():
+      e = expressions.readExpression()
       if e.checkCommand('beq', 'bne'):
         ex = expressions.readExpressionOffset(2)
         if len(ex) == 2:
@@ -121,7 +122,7 @@ def getRidOfRedundancy(block):
 
   return switch
 
-def optimizer(expressions, var = 0):
+def optimizer(expressions, verbose=0):
   lengths = []
   lengths.append(len(expressions))
   beq_bne(expressions)

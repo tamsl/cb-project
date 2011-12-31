@@ -3,6 +3,7 @@ from parse_lex import tokens
 from peep import Expression, Block
 import sys
 expressions = []
+error_count = 0
 raise_on_error = False
 beginning = 'system'
 
@@ -57,7 +58,6 @@ def p_command(p):
   '''
   expressions.append(Expression('command', p[1], *list(p)[2::2]))
 
-error_count = 0
 def p_error(p):
   print "Syntax error in input!"
   global raise_on_error
@@ -69,35 +69,16 @@ def p_error(p):
 parser = yacc.yacc() 
 
 def parse(p):
-  #  """Parse a given Assembly file, return a Block with Statement objects
-  # containing the parsed instructions."""
-  #  global statements
+   """Parse a given Assembly file, return a Block with Statement objects
+   containing the parsed instructions."""
+   global statements
 
-   # statements = []
+   statements = []
 
-   # try:
-   #     content = open(filename).read()
-   #     yacc.parse(content)
-   # except IOError:
-   #     raise Exception('File "%s" could not be opened' % filename)
-#
-   # return Block(statements) 
-  if len(sys.argv) > 1:
-    counter = 1
-    for line in open(sys.argv[0], 'r').readlines():
-      if not line.strip(): continue
-      result = parser.parse(line)
-      print counter, result
-      counter +=1
-      #if counter % 50 == 0: raw_input('pres key')
-    print 'errors: %d\n' % error_count
-    # interactive
-  else:
-    while True:
-     try:
-       s = raw_input('asmyacc > ')
-     except EOFError:
-       break
-     if not s: continue
-     result = parser.parse(s)
-     print repr(result)
+   try:
+     content = open(p).read()
+     yacc.parse(content)
+     print 'errors: %d\n' % error_count
+   except IOError:
+     raise Exception('File "%s" could not be opened' % filename)
+   return Block(statements) 
