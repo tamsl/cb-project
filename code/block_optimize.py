@@ -1,21 +1,5 @@
 from peep import Block
 
-# Accumulating defined registers of a block in blocks
-def definitions(bs):
-  def_bs = {}
-  for block in bs: 
-    for ex in block:
-      for def_register in ex.is_def():
-        # If defined register in collection
-        # add expression ID, else set of
-        # expression ID is added
-        if def_register in def_bs:
-          defs_bs[def_register].add(ex.eID)
-        else:
-          id_set = set([ex.eID])
-          defs_bs[def_register] = id_set
-  return defs
-
 # Choosing head expressions considering a jump target
 def head(expressions):
   heads = [0]

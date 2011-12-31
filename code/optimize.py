@@ -119,6 +119,5 @@ def optimize(expressions, var=0):
     print 'Expressions:     %d' % lengths[0]
     print 'Optimization:    %d' % lengths[1]
     print 'BB optimization: %d' % lengths[2]
-    print 'Optimization:    %d (%d%%)' \
-                % (lengths[0] - lengths[2], int((lengths[0] - lengths[2]) / float(lengths[2]) * 1000))  
+  
   return optimizedBlocks

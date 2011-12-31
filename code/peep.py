@@ -187,15 +187,7 @@ class Expression:
       return True
     else:
       return False
-  """
-  # Checking Branch expression
-  def checkBranch(self):
-    if re.match('bne|beq|bgtz|bltz|bct|bgez|bcf|blez$', self.name) \
-       and self.checkControl() == True:
-      return True
-    else:
-      return False
-  """
+
   # Checking Jump expression
   def checkJump(self):
     if re.match('^bne|beq|jal|j|bgtz|bltz|bct|bgez|bcf|blez$', self.name) \
@@ -203,150 +195,18 @@ class Expression:
       return True
     else:
       return False
-  """
-  # Checking Target Jump expression
-  def getTargetJump(self):
-    if self.checkJump() == True:
-      return self[-1]
-    else:
-      raise Exception('Command "%s" does not contain a target jump' % self.name)
-  """
+
   # Checking Shift expression
   def checkShift(self):
     if (re.match('^s(rl|ra|ll)$', self.name) and self.checkControl()) == True:
       return True
     else:
       return False
-  """
-  # Checking Shift 'less then' expression
-  def checkShift2(self):
-    cmds = ['sltu', 'slt']
-    for i in range(0, len(cmds)):
-      if self.name == cmds[i] and self.checkControl() == True:
-        return True
-    return False
-  """
+
   # Checking Load argument expression
   def checkLoad(self):
     cmds = ['dlw', 'l.s', 'l.d', 'li', 'lw'] 
     for i in range(0, len(cmds)):
       if self.name == cmds[i] and self.checkControl() == True:
         return True
-    return False  
-  """
-  # Checking Load expression
-  def checkLoad2(self):
-    if re.match('^l(bu|a|w||\.s|b|\.d)|dlw$', self.name) \
-       and self.checkControl() == True:
-      return True
-    else:
-      return False  
-
-  # Checking Arithmetic expression
-  def checkArithmetic(self):
-    if re.match('^s(rl|ra|ll)|(and|neg|mflo|mfhi|abs|[xn]?or)|(slt|add|sub)u?'
-                + '|sqrt|neg|div|abs|mult|c|add|sub)\.[sd]$', self.name) \
-       and self.checkControl() == True:
-      return True
-    else:
-      return False
-
-  # Checking Arithmetic controller expression
-  def checkArithmeticD(self):
-    if re.match('^(div|add|mul|sub)\.d$', self.name) \
-       and self.checkControl() == True:
-      return True
-    else:
-      return False
-
-  # Checking Move expression
-  def checkMove(self):
-    cmds = ['mthi', 'mflo'] 
-    for i in range(0, len(cmds)):
-      if self.name == cmds[i] and self.checkControl() == True:
-        return True
     return False
-
-  # Checking Unary expression
-  def checkMonop(self):
-    if not (self.checkArithmetic() == True and len(self) == 2):
-      return False
-    else:
-      return True
-
-  # Checking Unary controller expression
-  def checkUnaryD(self):
-    if re.match('^(neg|abs|mov)\.d$', self.name) and self.checkControl() == True:
-      return True
-    else:
-      return False
-
-  # Checking Binary expression
-  def checkBinop(self):
-    if len(self) == 3 and self.checkJump() == False \
-       and self.checkControl() == True:
-      return True
-    else:
-      return False
-
-  # Checking Truncate expression
-  def checkTruncate(self):
-    if re.match('^trunc\.[a-z\.]*$', self.name) and self.checkControl() == True:
-      return True
-    else:
-      return False
-
-  # Checking Convert expression
-  def checkConvert(self):
-    if re.match('^cvt\.[a-z\.]*$', self.name) and self.checkControl() == True:
-      return True
-    else:
-      return False
- 
-  # Checking Logic expression
-  def checkLogical(self):
-    if re.match('^(and|xor|or)i?$', self.name) and self.checkControl() == True:
-      return True
-    else:
-      return False
-
-  # Checking definition of register using retrieve()
-  def checkDefinition(self, register):
-    definition = self.retrieve()
-    return register in definition
-
-  # Checking usage of register using retrieveUsage()
-  def checkUsage(self, register):
-    usage = self.retrieveUsage()
-    return register in usage
-
-  # Retrieve expression variables
-  def retrieve(self):
-    if self.checkLoad() == True or self.checkLogical() == True \
-       or self.checkArithmetic() == True or self.checkArithmeticD() == True \
-       or self.checkConvert() == True or self.checkTruncate() == True \
-       or self.checkLoad2() == True or self.checkUnaryD() == True \
-       or self.checkShift2() == True or self.checkMove() == True \
-       or (self.name in ['addu', 'li', 'mtc1', 'move', 'dmfc1', 'subu'] \
-           and self.checkControl() == True):
-      return self[0]
-    else:
-      return []
-
-  # Usage of retrieved expression variables 
-  def retrieveUsage(self):
-    retrieved = []
-    
-    if self.checkControl('move') == True or len(self) == 2:
-      retrieved.append(self[1])
-    elif self.checkControl('sw', 'sb', 'dsw', 's.d', 's.s', 'lw'):
-      if re.match('^d+\(([^)]+)\)$', self[1]) == True:
-        retrieved.append(re.match('^d+\(([^)]+)\)$', self[1]).group(1))
-        cmds = ['dsw', 'sw']
-        for i in range(0, len(cmds)):
-          if self.name == cmds[i]:
-            retrieved.append(self[0])
-    elif self.checkBinop():
-      retrieved = retrieved + self[1:]
-    return retrieved
-  """
