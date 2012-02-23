@@ -1,0 +1,28 @@
+python - http://code.google.com/p/compilerbouw-hachje/
+python - http://code.google.com/p/compilerbouw101/
+java   - http://code.google.com/p/sandra-en-stefan/
+python - http://git.vo20.nl/compilerbouw.git/
+
+xggc moet via ssh en dat is nog niet gelukt, dus we gebruiken
+de .s assembly bestanden van anderen.
+
+python:
+download package python-ply
+parser.out en parsetab.py worden gecreëerd bij het runnen
+
+harm:
+python peepster.py foo.s
+
+fabien:
+je kan de bestanden wel runnen, maar zie nog niet precies
+wat er gebeurt.
+
+wat we als eerst moeten doen:
+
+- parsing
+harm:   peep_parser.py
+fabien: lexer.py en yaccer.py
+
+- verdeling in basic blocks
+harm:   peep_classes.py
+fabien: classes.py
